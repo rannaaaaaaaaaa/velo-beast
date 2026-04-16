@@ -1,10 +1,10 @@
 {
-  "name": "VeloBeast – Intervalos en Bici",
-  "short_name": "VeloBeast",
-  "description": "Entrenamiento por intervalos en bicicleta con guía por voz",
-  "start_url": "/index.html",
+  "name": "Kinger PTR – Personal Trainer",
+  "short_name": "Kinger PTR",
+  "description": "Entrenamiento por intervalos con guía por voz – Personal Trainer",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0a0a0f",
+  "background_color": "#0a0a12",
   "theme_color": "#7c3aed",
   "orientation": "portrait",
   "icons": [
