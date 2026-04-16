@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VeloBeast">
+<meta name="description" content="Entrenamiento por intervalos en bicicleta con guía por voz">
+<link rel="manifest" href="manifest.json">
+<title>VeloBeast 🐾</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #0a0a0f;
+  --bg2: #111118;
+  --bg3: #1a1a24;
+  --card: #16161f;
+  --border: rgba(255,255,255,0.07);
+  --text: #f0f0f8;
+  --muted: rgba(240,240,248,0.4);
+  --dim: rgba(240,240,248,0.15);
+
+  --suave: #4ade80;
+  --medio: #facc15;
+  --fuerte: #f97316;
+  --mfuerte: #ef4444;
+
+  --accent: #7c3aed;
+  --accent2: #a78bfa;
+
+  --r: 16px;
+  --shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
+/* ─── SCREENS ─── */
+.screen { 
+  position: absolute; inset: 0; 
+  display: none; 
+  flex-direction: column;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.screen.active { display: flex; }
+
+/* ─── HOME ─── */
+#home {
+  background: radial-gradient(ellipse at 30% 20%, rgba(124,58,237,0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 80%, rgba(79,70,229,0.1) 0%, transparent 50%),
+              var(--bg);
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px 32px;
+}
+
+.home-top {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 52px 0 0;
+}
+
+.app-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  letter-spacing: 3px;
+  color: var(--text);
+}
+
+.streak-pill {
+  background: rgba(124,58,237,0.2);
+  border: 1px solid rgba(124,58,237,0.4);
+  border-radius: 40px;
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.streak-fire { font-size: 16px; }
+
+.mascot-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.mascot-wrap {
+  position: relative;
+  width: 160px;
+  height: 160px;
+}
+
+.mascot-svg {
+  width: 160px;
+  height: 160px;
+  filter: drop-shadow(0 0 24px rgba(124,58,237,0.4));
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.mascot-bubble {
+  position: absolute;
+  top: -14px;
+  right: -20px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+  animation: fadeInPop 0.4s ease;
+}
+.mascot-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 20px;
+  width: 10px; height: 10px;
+  background: var(--card);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  transform: rotate(45deg);
+}
+
+@keyframes fadeInPop {
+  from { opacity: 0; transform: scale(0.8) translateY(4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.mascot-name {
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.day-card {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px 18px;
+  margin-bottom: 12px;
+}
+
+.day-label {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.day-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.day-preview {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.dp-block {
+  height: 6px;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.dp-suave { background: var(--suave); }
+.dp-medio { background: var(--medio); }
+.dp-fuerte { background: var(--fuerte); }
+.dp-mfuerte { background: var(--mfuerte); }
+
+.home-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, var(--accent), #4f46e5);
+  border: none;
+  border-radius: var(--r);
+  color: white;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 3px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(124,58,237,0.4);
+  transition: transform 0.1s, box-shadow 0.2s;
+}
+.btn-primary:active { transform: scale(0.97); box-shadow: 0 2px 12px rgba(124,58,237,0.3); }
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.btn-secondary {
+  width: 100%;
+  padding: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.btn-secondary:active { transform: scale(0.97); background: var(--bg3); }
+
+/* ─── ROUTINE PICKER ─── */
+#picker {
+  background: var(--bg);
+  padding: 0 20px 100px;
+}
+
+.nav-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 52px 0 20px;
+}
+
+.btn-back {
+  width: 42px; height: 42px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.btn-back:active { background: var(--bg3); }
+
+.nav-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 2px;
+}
+
+.section-title {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  margin: 20px 0 10px;
+}
+
+.routine-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.1s;
+  position: relative;
+  overflow: hidden;
+}
+.routine-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: transparent;
+  transition: background 0.2s;
+}
+.routine-card.selected {
+  border-color: rgba(124,58,237,0.5);
+  background: rgba(124,58,237,0.08);
+}
+.routine-card.selected::before { background: var(--accent2); }
+.routine-card:active { transform: scale(0.98); }
+
+.rc-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.rc-name {
+  font-weight: 700;
+  font-size: 16px;
+}
+.rc-day-badge {
+  font-size: 10px;
+  background: rgba(124,58,237,0.2);
+  border: 1px solid rgba(124,58,237,0.3);
+  color: var(--accent2);
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.rc-meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.rc-blocks {
+  display: flex;
+  gap: 2px;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rc-block { height: 100%; border-radius: 2px; }
+
+.btn-start-routine {
+  position: fixed;
+  bottom: 24px;
+  left: 20px; right: 20px;
+  padding: 18px;
+  background: linear-gradient(135deg, var(--accent), #4f46e5);
+  border: none;
+  border-radius: var(--r);
+  color: white;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 3px;
+  cursor: pointer;
+  box-shadow: 0 4px 24px rgba(124,58,237,0.4);
+  transition: transform 0.1s;
+  z-index: 10;
+}
+.btn-start-routine:active { transform: scale(0.97); }
+
+/* ─── WORKOUT ─── */
+#workout {
+  background: var(--bg);
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px 36px;
+  overflow: hidden;
+}
+
+.workout-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 52px;
+}
+
+.wh-title { 
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 2px;
+  color: var(--muted);
+}
+
+.wh-close {
+  width: 38px; height: 38px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  transition: background 0.2s;
+}
+
+.intensity-display {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  justify-content: center;
+}
+
+.intensity-ring {
+  position: relative;
+  width: 200px;
+  height: 200px;
+}
+
+.intensity-ring svg {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+
+.intensity-ring circle.track {
+  fill: none;
+  stroke: rgba(255,255,255,0.06);
+  stroke-width: 8;
+}
+
+.intensity-ring circle.progress {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease, stroke 0.4s ease;
+}
+
+.ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.intensity-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  letter-spacing: 3px;
+  transition: color 0.3s;
+}
+
+.block-timer {
+  font-size: 42px;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+}
+
+.block-sub {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.blocks-timeline {
+  width: 100%;
+  display: flex;
+  gap: 3px;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.bt-block {
+  height: 100%;
+  border-radius: 2px;
+  transition: opacity 0.3s;
+  position: relative;
+}
+.bt-block.done { opacity: 0.35; }
+.bt-block.current { opacity: 1; position: relative; }
+.bt-block.current::after {
+  content: '';
+  position: absolute;
+  top: -2px; bottom: -2px;
+  left: 0; right: 0;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 3px;
+  animation: pulse-border 1s ease-in-out infinite;
+}
+@keyframes pulse-border {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.stats-row {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+}
+
+.stat-card {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.stat-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 1px;
+}
+
+.next-block-pill {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  padding: 8px 18px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.nbp-name { font-weight: 600; color: var(--text); }
+
+.workout-controls {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-ctrl {
+  flex: 1;
+  padding: 18px;
+  border: none;
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: transform 0.1s, opacity 0.2s;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 2px;
+}
+.btn-ctrl:active { transform: scale(0.96); }
+
+.btn-pause {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.btn-stop {
+  background: rgba(239,68,68,0.12);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: #ef4444;
+  flex: 0.4;
+}
+
+/* ─── SUMMARY ─── */
+#summary {
+  background: radial-gradient(ellipse at 50% 0%, rgba(74,222,128,0.12) 0%, transparent 60%),
+              var(--bg);
+  align-items: center;
+  padding: 0 24px 40px;
+  gap: 20px;
+}
+
+.summary-top {
+  padding-top: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: center;
+}
+
+.summary-emoji {
+  font-size: 64px;
+  animation: bounceIn 0.6s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes bounceIn {
+  from { transform: scale(0) rotate(-10deg); opacity: 0; }
+  to { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.summary-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  letter-spacing: 3px;
+}
+.summary-msg {
+  font-size: 15px;
+  color: var(--muted);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.summary-stats {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.ss-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+}
+.ss-label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.ss-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  letter-spacing: 1px;
+}
+
+.blocks-breakdown {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+}
+
+.bb-title {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.bb-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.bb-row:last-child { border-bottom: none; }
+
+.bb-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.bb-name {
+  flex: 1;
+  margin-left: 10px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.bb-time {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  color: var(--muted);
+}
+
+.mascot-celebrate {
+  animation: celebrate 0.5s ease-in-out 3;
+}
+@keyframes celebrate {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-15px) rotate(-5deg); }
+  75% { transform: translateY(-8px) rotate(5deg); }
+}
+
+/* ─── PAUSED OVERLAY ─── */
+.paused-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10,10,15,0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  z-index: 50;
+  display: none;
+}
+.paused-overlay.visible { display: flex; }
+
+.paused-text {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+  letter-spacing: 4px;
+  color: var(--accent2);
+}
+
+/* ─── TOAST ─── */
+.toast {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-80px);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  z-index: 999;
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ─── TRANSITIONS ─── */
+.screen-enter {
+  animation: slideUp 0.35s cubic-bezier(0.32,0.72,0,1);
+}
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 0; }
+
+</style>
+</head>
+<body>
+
+<!-- ════════════════ HOME ════════════════ -->
+<div id="home" class="screen active">
+  <div class="home-top">
+    <div class="app-title">VELOBEAST</div>
+    <div class="streak-pill">
+      <span class="streak-fire">🔥</span>
+      <span id="streak-count">0</span> días
+    </div>
+  </div>
+
+  <div class="mascot-area">
+    <div class="mascot-wrap">
+      <svg class="mascot-svg" id="mascot-svg" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- body -->
+        <ellipse cx="80" cy="95" rx="38" ry="32" fill="#7c3aed" opacity="0.9"/>
+        <!-- head -->
+        <ellipse cx="80" cy="60" rx="30" ry="28" fill="#a78bfa"/>
+        <!-- ears -->
+        <ellipse cx="55" cy="38" rx="9" ry="13" fill="#7c3aed" transform="rotate(-15 55 38)"/>
+        <ellipse cx="105" cy="38" rx="9" ry="13" fill="#7c3aed" transform="rotate(15 105 38)"/>
+        <ellipse cx="55" cy="38" rx="5" ry="8" fill="#c4b5fd" opacity="0.6" transform="rotate(-15 55 38)"/>
+        <ellipse cx="105" cy="38" rx="5" ry="8" fill="#c4b5fd" opacity="0.6" transform="rotate(15 105 38)"/>
+        <!-- eyes -->
+        <ellipse id="eye-l" cx="70" cy="56" rx="7" ry="8" fill="white"/>
+        <ellipse id="eye-r" cx="90" cy="56" rx="7" ry="8" fill="white"/>
+        <circle id="pupil-l" cx="71" cy="57" r="4" fill="#1a1a24"/>
+        <circle id="pupil-r" cx="91" cy="57" r="4" fill="#1a1a24"/>
+        <circle cx="73" cy="55" r="1.5" fill="white"/>
+        <circle cx="93" cy="55" r="1.5" fill="white"/>
+        <!-- nose -->
+        <ellipse cx="80" cy="68" rx="4" ry="2.5" fill="#6d28d9"/>
+        <!-- mouth - happy by default -->
+        <path id="mascot-mouth" d="M 72 74 Q 80 80 88 74" stroke="#6d28d9" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <!-- cheeks -->
+        <ellipse id="cheek-l" cx="62" cy="68" rx="7" ry="5" fill="#f472b6" opacity="0.4"/>
+        <ellipse id="cheek-r" cx="98" cy="68" rx="7" ry="5" fill="#f472b6" opacity="0.4"/>
+        <!-- tail -->
+        <path d="M 118 90 Q 140 75 135 60 Q 130 50 140 45" stroke="#7c3aed" stroke-width="8" stroke-linecap="round" fill="none"/>
+        <!-- arms -->
+        <ellipse cx="47" cy="90" rx="10" ry="18" fill="#7c3aed" transform="rotate(15 47 90)"/>
+        <ellipse cx="113" cy="90" rx="10" ry="18" fill="#7c3aed" transform="rotate(-15 113 90)"/>
+        <!-- legs -->
+        <ellipse cx="65" cy="120" rx="11" ry="16" fill="#6d28d9"/>
+        <ellipse cx="95" cy="120" rx="11" ry="16" fill="#6d28d9"/>
+        <!-- belly patch -->
+        <ellipse cx="80" cy="98" rx="20" ry="18" fill="#c4b5fd" opacity="0.3"/>
+      </svg>
+      <div class="mascot-bubble" id="mascot-bubble">¡Listo para rodar! 🚴</div>
+    </div>
+    <div class="mascot-name">KIRA</div>
+  </div>
+
+  <div id="today-card" class="day-card"></div>
+
+  <div class="home-actions">
+    <button class="btn-primary" onclick="goToPickerWithToday()">🚴 EMPEZAR HOY</button>
+    <button class="btn-secondary" onclick="showScreen('picker')">📋 Elegir rutina</button>
+  </div>
+</div>
+
+<!-- ════════════════ PICKER ════════════════ -->
+<div id="picker" class="screen">
+  <div class="nav-header">
+    <div class="btn-back" onclick="showScreen('home')">←</div>
+    <div class="nav-title">RUTINAS</div>
+  </div>
+
+  <div class="section-title">Tu plan semanal</div>
+  <div id="routine-list"></div>
+  <div class="section-title">Personalizadas</div>
+  <div id="custom-list"></div>
+
+  <div style="height:80px"></div>
+  <button class="btn-start-routine" onclick="startSelectedRoutine()">EMPEZAR RUTINA</button>
+</div>
+
+<!-- ════════════════ WORKOUT ════════════════ -->
+<div id="workout" class="screen">
+  <div class="workout-header">
+    <div class="wh-title" id="workout-name">ENTRENAMIENTO</div>
+    <div class="wh-close" onclick="confirmStop()">✕</div>
+  </div>
+
+  <div class="intensity-display">
+    <div class="intensity-ring" id="intensity-ring">
+      <svg viewBox="0 0 200 200" width="200" height="200">
+        <circle class="track" cx="100" cy="100" r="88"/>
+        <circle class="progress" id="ring-progress" cx="100" cy="100" r="88"
+          stroke-dasharray="553" stroke-dashoffset="553" stroke="var(--suave)"/>
+      </svg>
+      <div class="ring-center">
+        <div class="intensity-label" id="intensity-label">SUAVE</div>
+        <div class="block-timer" id="block-timer">00:00</div>
+        <div class="block-sub" id="block-sub">EN ESTE BLOQUE</div>
+      </div>
+    </div>
+
+    <div class="next-block-pill" id="next-block-pill">
+      Siguiente: <span class="nbp-name" id="next-block-name">–</span>
+    </div>
+  </div>
+
+  <div class="blocks-timeline" id="blocks-timeline"></div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Tiempo total</div>
+      <div class="stat-value" id="total-timer">00:00</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Bloque</div>
+      <div class="stat-value" id="block-counter">1/1</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Intensidad</div>
+      <div class="stat-value" id="intensity-icon">🟢</div>
+    </div>
+  </div>
+
+  <div class="workout-controls">
+    <button class="btn-ctrl btn-pause" id="btn-pause" onclick="togglePause()">⏸ PAUSAR</button>
+    <button class="btn-ctrl btn-stop" onclick="confirmStop()">■</button>
+  </div>
+
+  <div class="paused-overlay" id="paused-overlay">
+    <svg width="80" height="80" viewBox="0 0 160 160" fill="none" class="mascot-svg" style="filter:drop-shadow(0 0 20px rgba(124,58,237,0.5))">
+      <ellipse cx="80" cy="95" rx="38" ry="32" fill="#7c3aed" opacity="0.9"/>
+      <ellipse cx="80" cy="60" rx="30" ry="28" fill="#a78bfa"/>
+      <ellipse cx="55" cy="38" rx="9" ry="13" fill="#7c3aed" transform="rotate(-15 55 38)"/>
+      <ellipse cx="105" cy="38" rx="9" ry="13" fill="#7c3aed" transform="rotate(15 105 38)"/>
+      <circle cx="70" cy="57" r="4" fill="#1a1a24"/>
+      <circle cx="90" cy="57" r="4" fill="#1a1a24"/>
+    </svg>
+    <div class="paused-text">PAUSA</div>
+    <button class="btn-primary" style="width:200px;padding:14px;font-size:18px" onclick="togglePause()">▶ CONTINUAR</button>
+  </div>
+</div>
+
+<!-- ════════════════ SUMMARY ════════════════ -->
+<div id="summary" class="screen">
+  <div class="summary-top">
+    <div class="summary-emoji" id="summary-emoji">🏆</div>
+    <div class="summary-title" id="summary-title">¡COMPLETADO!</div>
+    <div class="summary-msg" id="summary-msg">Excelente trabajo hoy.</div>
+  </div>
+
+  <div class="summary-stats" id="summary-stats"></div>
+  <div class="blocks-breakdown" id="blocks-breakdown"></div>
+
+  <button class="btn-primary" onclick="showScreen('home')" style="margin-top:4px">VOLVER AL INICIO</button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════
+//  DATA & STATE
+// ══════════════════════════════════════
+
+const INTENSITIES = {
+  suave:   { label: 'SUAVE',      color: '#4ade80', icon: '🟢', tts: 'Suave' },
+  medio:   { label: 'MEDIO',      color: '#facc15', icon: '🟡', tts: 'Medio' },
+  fuerte:  { label: 'FUERTE',     color: '#f97316', icon: '🔴', tts: 'Fuerte' },
+  mfuerte: { label: 'MUY FUERTE', color: '#ef4444', icon: '⚫', tts: 'Muy fuerte' },
+};
+
+// Rutinas del plan semanal
+const WEEKLY_PLAN = {
+  1: { // Lunes
+    name: 'Lunes – Base',
+    day: 'LUNES',
+    minutes: 65,
+    blocks: [
+      { type: 'suave',  mins: 10 },
+      { type: 'medio',  mins: 30 },
+      { type: 'fuerte', mins: 15 },
+      { type: 'suave',  mins: 10 },
+    ],
+    note: '20 flexiones · 20 sentadillas'
+  },
+  2: { // Martes
+    name: 'Martes – Intervalos',
+    day: 'MARTES',
+    minutes: 70,
+    blocks: [
+      { type: 'suave',   mins: 10 },
+      ...Array(6).fill(null).flatMap(() => [
+        { type: 'mfuerte', mins: 3, label: 'MUY FUERTE ×6' },
+        { type: 'suave',   mins: 3, label: 'SUAVE ×6' },
+      ]),
+      { type: 'suave',   mins: 10 },
+    ],
+    note: 'Curl bíceps 3×12 · Curl inverso 3×10'
+  },
+  3: { // Miércoles
+    name: 'Miércoles – Largo',
+    day: 'MIÉRCOLES',
+    minutes: 70,
+    blocks: [
+      { type: 'suave',  mins: 10 },
+      { type: 'medio',  mins: 25 },
+      { type: 'fuerte', mins: 20 },
+      { type: 'suave',  mins: 15 },
+    ],
+    note: '25 flexiones · 25 sentadillas'
+  },
+  4: { // Jueves
+    name: 'Jueves – Recuperación',
+    day: 'JUEVES',
+    minutes: 40,
+    blocks: [
+      { type: 'suave', mins: 40 },
+    ],
+    note: 'Día tranquilo 🌿 · Mancuerna 3×12'
+  },
+  5: { // Viernes
+    name: 'Viernes – Duro',
+    day: 'VIERNES',
+    minutes: 65,
+    blocks: [
+      { type: 'suave',   mins: 10 },
+      { type: 'medio',   mins: 20 },
+      { type: 'fuerte',  mins: 20 },
+      { type: 'mfuerte', mins: 15 },
+    ],
+    note: '20 flexiones'
+  },
+  6: { // Sábado
+    name: 'Sábado – Bestia',
+    day: 'SÁBADO',
+    minutes: 100,
+    blocks: [
+      { type: 'suave',  mins: 10 },
+      { type: 'medio',  mins: 75 },
+      { type: 'fuerte', mins: 15 },
+    ],
+    note: '30 sentadillas · 20 flexiones'
+  },
+  0: { // Domingo
+    name: 'Domingo – Descanso',
+    day: 'DOMINGO',
+    minutes: 0,
+    blocks: [],
+    rest: true,
+    note: 'Descansá, te lo merecés 😴'
+  }
+};
+
+const CUSTOM_ROUTINES = [
+  {
+    id: 'c1',
+    name: 'Intervalos cortos',
+    blocks: Array(8).fill(null).flatMap(() => [
+      { type: 'fuerte',  mins: 2 },
+      { type: 'suave',   mins: 2 },
+    ])
+  },
+  {
+    id: 'c2',
+    name: 'Pirámide',
+    blocks: [
+      { type: 'suave',   mins: 5  },
+      { type: 'medio',   mins: 5  },
+      { type: 'fuerte',  mins: 5  },
+      { type: 'mfuerte', mins: 5  },
+      { type: 'fuerte',  mins: 5  },
+      { type: 'medio',   mins: 5  },
+      { type: 'suave',   mins: 5  },
+    ]
+  }
+];
+
+// App state
+const STATE = {
+  streak: 0,
+  lastWorkout: null, // ISO date string
+  totalWorkouts: 0,
+  selectedRoutineId: null,
+  currentBlocks: [],
+  currentBlockIdx: 0,
+  blockElapsed: 0,
+  totalElapsed: 0,
+  isPaused: false,
+  isRunning: false,
+  workoutStartTime: null,
+  completedBlocks: 0,
+  timer: null,
+};
+
+// ══════════════════════════════════════
+//  PERSISTENCE
+// ══════════════════════════════════════
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('velobeast_v1') || '{}');
+    STATE.streak = saved.streak || 0;
+    STATE.lastWorkout = saved.lastWorkout || null;
+    STATE.totalWorkouts = saved.totalWorkouts || 0;
+  } catch(e) {}
+}
+
+function saveState() {
+  localStorage.setItem('velobeast_v1', JSON.stringify({
+    streak: STATE.streak,
+    lastWorkout: STATE.lastWorkout,
+    totalWorkouts: STATE.totalWorkouts
+  }));
+}
+
+// ══════════════════════════════════════
+//  SPEECH
+// ══════════════════════════════════════
+function speak(text, urgent = false) {
+  if (!window.speechSynthesis) return;
+  if (urgent) speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'es-ES';
+  u.rate = 0.9;
+  u.pitch = 1.1;
+  u.volume = 1.0;
+
+  // Try to find a good Spanish voice
+  const voices = speechSynthesis.getVoices();
+  const es = voices.find(v => v.lang.startsWith('es') && v.localService);
+  if (es) u.voice = es;
+
+  speechSynthesis.speak(u);
+}
+
+// ══════════════════════════════════════
+//  VIBRATION
+// ══════════════════════════════════════
+function vibrate(pattern) {
+  if (navigator.vibrate) navigator.vibrate(pattern);
+}
+
+// ══════════════════════════════════════
+//  SCREEN NAVIGATION
+// ══════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const s = document.getElementById(id);
+  s.classList.add('active', 'screen-enter');
+  setTimeout(() => s.classList.remove('screen-enter'), 400);
+
+  if (id === 'home') updateHomeUI();
+  if (id === 'picker') buildPickerUI();
+}
+
+// ══════════════════════════════════════
+//  HOME UI
+// ══════════════════════════════════════
+function updateHomeUI() {
+  document.getElementById('streak-count').textContent = STATE.streak;
+
+  const today = new Date();
+  const dow = today.getDay(); // 0=sun, 1=mon...
+  const plan = WEEKLY_PLAN[dow];
+
+  const card = document.getElementById('today-card');
+
+  if (!plan || plan.rest) {
+    card.innerHTML = `
+      <div class="day-label">HOY · ${getDayName(dow)}</div>
+      <div class="day-name">DÍA DE DESCANSO 😴</div>
+      <div style="font-size:13px;color:var(--muted)">Recuperate para mañana 💪</div>`;
+  } else {
+    const totalMin = plan.blocks.reduce((a,b) => a + b.mins, 0);
+    card.innerHTML = `
+      <div class="day-label">HOY · ${getDayName(dow)}</div>
+      <div class="day-name">${plan.day} – ${totalMin} MIN</div>
+      <div class="day-preview">${buildBlockBar(plan.blocks, 260)}</div>
+      ${plan.note ? `<div style="font-size:12px;color:var(--muted);margin-top:8px">💪 ${plan.note}</div>` : ''}`;
+  }
+
+  // Mascot mood
+  updateMascotMood();
+}
+
+function getDayName(d) {
+  return ['DOMINGO','LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO'][d];
+}
+
+function buildBlockBar(blocks, totalPx) {
+  const totalMins = blocks.reduce((a,b) => a + b.mins, 0) || 1;
+  return blocks.map(b => {
+    const w = Math.round((b.mins / totalMins) * totalPx);
+    const cls = `dp-${b.type}`;
+    return `<div class="dp-block ${cls}" style="width:${w}px"></div>`;
+  }).join('');
+}
+
+function updateMascotMood() {
+  const bubble = document.getElementById('mascot-bubble');
+  const mouth = document.getElementById('mascot-mouth');
+  const cheekL = document.getElementById('cheek-l');
+  const cheekR = document.getElementById('cheek-r');
+
+  const streak = STATE.streak;
+
+  let msg, mouthPath;
+
+  if (streak === 0) {
+    msg = '¡Listo para rodar! 🚴';
+    mouthPath = 'M 72 74 Q 80 80 88 74';
+    cheekL.setAttribute('opacity', '0.4');
+    cheekR.setAttribute('opacity', '0.4');
+  } else if (streak >= 7) {
+    msg = `¡${streak} días seguidos! 🔥🔥🔥`;
+    mouthPath = 'M 70 72 Q 80 82 90 72';
+    cheekL.setAttribute('opacity', '0.7');
+    cheekR.setAttribute('opacity', '0.7');
+  } else if (streak >= 3) {
+    msg = `¡${streak} días racha! 🔥 ¡Vas muy bien!`;
+    mouthPath = 'M 71 73 Q 80 81 89 73';
+    cheekL.setAttribute('opacity', '0.55');
+    cheekR.setAttribute('opacity', '0.55');
+  } else {
+    msg = `¡${streak} día${streak>1?'s':''} de racha! Seguí así 💜`;
+    mouthPath = 'M 72 74 Q 80 80 88 74';
+    cheekL.setAttribute('opacity', '0.4');
+    cheekR.setAttribute('opacity', '0.4');
+  }
+
+  bubble.textContent = msg;
+  mouth.setAttribute('d', mouthPath);
+}
+
+// ══════════════════════════════════════
+//  PICKER UI
+// ══════════════════════════════════════
+function goToPickerWithToday() {
+  const dow = new Date().getDay();
+  const plan = WEEKLY_PLAN[dow];
+  if (plan && !plan.rest) {
+    STATE.selectedRoutineId = `week_${dow}`;
+  }
+  showScreen('picker');
+}
+
+function buildPickerUI() {
+  const list = document.getElementById('routine-list');
+  list.innerHTML = '';
+
+  const today = new Date().getDay();
+
+  Object.entries(WEEKLY_PLAN).forEach(([dow, plan]) => {
+    if (plan.rest) return;
+    const id = `week_${dow}`;
+    const totalMin = plan.blocks.reduce((a,b) => a + b.mins, 0);
+    const isToday = parseInt(dow) === today;
+    const isSelected = STATE.selectedRoutineId === id;
+
+    const card = document.createElement('div');
+    card.className = `routine-card ${isSelected ? 'selected' : ''}`;
+    card.id = `rc_${id}`;
+    card.innerHTML = `
+      <div class="rc-top">
+        <div class="rc-name">${plan.name}</div>
+        ${isToday ? '<div class="rc-day-badge">HOY</div>' : ''}
+      </div>
+      <div class="rc-meta">${totalMin} min · ${plan.blocks.length} bloques${plan.note ? ' · ' + plan.note : ''}</div>
+      <div class="rc-blocks">${buildBlockBar(plan.blocks, 300)}</div>
+    `;
+    card.onclick = () => selectRoutine(id);
+    list.appendChild(card);
+  });
+
+  const clist = document.getElementById('custom-list');
+  clist.innerHTML = '';
+
+  CUSTOM_ROUTINES.forEach(r => {
+    const totalMin = r.blocks.reduce((a,b) => a + b.mins, 0);
+    const isSelected = STATE.selectedRoutineId === r.id;
+    const card = document.createElement('div');
+    card.className = `routine-card ${isSelected ? 'selected' : ''}`;
+    card.id = `rc_${r.id}`;
+    card.innerHTML = `
+      <div class="rc-top"><div class="rc-name">${r.name}</div></div>
+      <div class="rc-meta">${totalMin} min · ${r.blocks.length} bloques</div>
+      <div class="rc-blocks">${buildBlockBar(r.blocks, 300)}</div>
+    `;
+    card.onclick = () => selectRoutine(r.id);
+    clist.appendChild(card);
+  });
+
+  if (!STATE.selectedRoutineId) {
+    const defaultId = `week_${today}`;
+    if (WEEKLY_PLAN[today] && !WEEKLY_PLAN[today].rest) {
+      selectRoutine(defaultId);
+    } else {
+      selectRoutine('week_1');
+    }
+  }
+}
+
+function selectRoutine(id) {
+  document.querySelectorAll('.routine-card').forEach(c => c.classList.remove('selected'));
+  const el = document.getElementById(`rc_${id}`);
+  if (el) el.classList.add('selected');
+  STATE.selectedRoutineId = id;
+}
+
+function getRoutineById(id) {
+  if (id.startsWith('week_')) {
+    const dow = parseInt(id.split('_')[1]);
+    return WEEKLY_PLAN[dow];
+  }
+  return CUSTOM_ROUTINES.find(r => r.id === id);
+}
+
+function startSelectedRoutine() {
+  if (!STATE.selectedRoutineId) { showToast('Elegí una rutina primero'); return; }
+  const routine = getRoutineById(STATE.selectedRoutineId);
+  if (!routine || !routine.blocks || routine.blocks.length === 0) {
+    showToast('Esta rutina está vacía'); return;
+  }
+  startWorkout(routine);
+}
+
+// ══════════════════════════════════════
+//  WORKOUT ENGINE
+// ══════════════════════════════════════
+function startWorkout(routine) {
+  // Expand blocks to seconds
+  STATE.currentBlocks = routine.blocks.map((b, i) => ({
+    ...b,
+    totalSecs: b.mins * 60,
+    idx: i,
+    label: b.label || INTENSITIES[b.type].label
+  }));
+  STATE.currentBlockIdx = 0;
+  STATE.blockElapsed = 0;
+  STATE.totalElapsed = 0;
+  STATE.isPaused = false;
+  STATE.isRunning = true;
+  STATE.workoutStartTime = Date.now();
+  STATE.completedBlocks = 0;
+  STATE.routineName = routine.name;
+
+  buildTimeline();
+  showScreen('workout');
+  document.getElementById('workout-name').textContent = routine.name;
+
+  // Wake lock (keep screen on)
+  requestWakeLock();
+
+  // First block announcement
+  const first = STATE.currentBlocks[0];
+  speak(`Comenzando. ${INTENSITIES[first.type].tts}`, true);
+  vibrate([100, 50, 100]);
+
+  startTimer();
+}
+
+function startTimer() {
+  clearInterval(STATE.timer);
+  STATE.timer = setInterval(tick, 1000);
+}
+
+function tick() {
+  if (STATE.isPaused || !STATE.isRunning) return;
+
+  STATE.blockElapsed++;
+  STATE.totalElapsed++;
+
+  const block = STATE.currentBlocks[STATE.currentBlockIdx];
+
+  // 10 sec warning
+  const remaining = block.totalSecs - STATE.blockElapsed;
+  if (remaining === 10) {
+    const next = STATE.currentBlocks[STATE.currentBlockIdx + 1];
+    if (next) {
+      speak(`10 segundos. Siguiente: ${INTENSITIES[next.type].tts}`);
+      vibrate([50, 50, 50]);
+    } else {
+      speak('Último bloque. ¡Casi terminás!');
+      vibrate([50, 50, 50]);
+    }
+  }
+
+  // Block complete
+  if (STATE.blockElapsed >= block.totalSecs) {
+    STATE.completedBlocks++;
+    STATE.currentBlockIdx++;
+
+    if (STATE.currentBlockIdx >= STATE.currentBlocks.length) {
+      finishWorkout();
+      return;
+    }
+
+    // New block
+    STATE.blockElapsed = 0;
+    const newBlock = STATE.currentBlocks[STATE.currentBlockIdx];
+    speak(INTENSITIES[newBlock.type].tts, true);
+    vibrate([150, 80, 150]);
+    buildTimeline();
+  }
+
+  updateWorkoutUI();
+}
+
+function updateWorkoutUI() {
+  const block = STATE.currentBlocks[STATE.currentBlockIdx];
+  if (!block) return;
+
+  const int = INTENSITIES[block.type];
+  const remaining = block.totalSecs - STATE.blockElapsed;
+  const progress = STATE.blockElapsed / block.totalSecs;
+
+  // Ring
+  const circumference = 553;
+  const offset = circumference - (progress * circumference);
+  const ring = document.getElementById('ring-progress');
+  ring.style.strokeDashoffset = offset;
+  ring.style.stroke = int.color;
+
+  // Label
+  const lbl = document.getElementById('intensity-label');
+  lbl.textContent = int.label;
+  lbl.style.color = int.color;
+
+  // Timer
+  document.getElementById('block-timer').textContent = fmtTime(remaining);
+  document.getElementById('intensity-icon').textContent = int.icon;
+  document.getElementById('total-timer').textContent = fmtTime(STATE.totalElapsed);
+  document.getElementById('block-counter').textContent = 
+    `${STATE.currentBlockIdx + 1}/${STATE.currentBlocks.length}`;
+
+  // Next
+  const next = STATE.currentBlocks[STATE.currentBlockIdx + 1];
+  if (next) {
+    document.getElementById('next-block-name').textContent = 
+      `${INTENSITIES[next.type].label} (${next.mins}min)`;
+  } else {
+    document.getElementById('next-block-name').textContent = '¡Último!';
+  }
+
+  // Timeline progress
+  const btBlocks = document.querySelectorAll('.bt-block');
+  btBlocks.forEach((el, i) => {
+    el.classList.remove('done','current');
+    if (i < STATE.currentBlockIdx) el.classList.add('done');
+    if (i === STATE.currentBlockIdx) el.classList.add('current');
+  });
+}
+
+function buildTimeline() {
+  const tl = document.getElementById('blocks-timeline');
+  const total = STATE.currentBlocks.reduce((a,b) => a+b.totalSecs, 0);
+  tl.innerHTML = STATE.currentBlocks.map((b, i) => {
+    const w = Math.round((b.totalSecs / total) * 100);
+    const cls = i < STATE.currentBlockIdx ? 'done' : i === STATE.currentBlockIdx ? 'current' : '';
+    return `<div class="bt-block ${cls}" style="flex:${b.mins};background:${INTENSITIES[b.type].color}"></div>`;
+  }).join('');
+}
+
+function fmtTime(secs) {
+  const m = Math.floor(secs / 60).toString().padStart(2,'0');
+  const s = (secs % 60).toString().padStart(2,'0');
+  return `${m}:${s}`;
+}
+
+function togglePause() {
+  STATE.isPaused = !STATE.isPaused;
+  const overlay = document.getElementById('paused-overlay');
+  const btnPause = document.getElementById('btn-pause');
+
+  if (STATE.isPaused) {
+    overlay.classList.add('visible');
+    btnPause.textContent = '▶ CONTINUAR';
+    speak('Pausa');
+    vibrate([200]);
+  } else {
+    overlay.classList.remove('visible');
+    btnPause.textContent = '⏸ PAUSAR';
+    speak('¡Seguimos!', true);
+    vibrate([100, 50, 200]);
+  }
+}
+
+function confirmStop() {
+  if (confirm('¿Salir del entrenamiento?')) {
+    stopWorkout(false);
+  }
+}
+
+function stopWorkout(completed) {
+  clearInterval(STATE.timer);
+  STATE.isRunning = false;
+  releaseWakeLock();
+  speechSynthesis.cancel();
+
+  if (completed) {
+    recordWorkout();
+    showSummary(true);
+  } else {
+    // Partial – no streak
+    showScreen('home');
+  }
+}
+
+function finishWorkout() {
+  clearInterval(STATE.timer);
+  STATE.isRunning = false;
+  speak('¡Terminaste! Excelente trabajo. ¡Así se hace!', true);
+  vibrate([200,100,200,100,400]);
+  releaseWakeLock();
+  recordWorkout();
+  setTimeout(() => showSummary(true), 1800);
+}
+
+function recordWorkout() {
+  const today = new Date().toISOString().split('T')[0];
+  if (STATE.lastWorkout !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    if (STATE.lastWorkout === yesterday) {
+      STATE.streak++;
+    } else {
+      STATE.streak = 1;
+    }
+    STATE.lastWorkout = today;
+    STATE.totalWorkouts++;
+    saveState();
+  }
+}
+
+// ══════════════════════════════════════
+//  SUMMARY
+// ══════════════════════════════════════
+function showSummary(completed) {
+  showScreen('summary');
+
+  const totalMins = Math.floor(STATE.totalElapsed / 60);
+  const pct = Math.round((STATE.completedBlocks / STATE.currentBlocks.length) * 100);
+
+  // Emoji + title + message
+  let emoji, title, msg;
+
+  if (pct === 100) {
+    emoji = STATE.streak >= 5 ? '🏆' : STATE.streak >= 3 ? '⭐' : '✅';
+    title = pct === 100 ? '¡COMPLETADO!' : 'BUEN TRABAJO';
+    const msgs = [
+      'Hoy te superaste. El esfuerzo se acumula.',
+      '¡Así se construye una bestia! Cada pedalada cuenta.',
+      `¡${STATE.streak} días seguidos! Sos imparable.`,
+      'Tu cuerpo te lo va a agradecer. Buen trabajo.',
+      'Esto es lo que separa a los que hablan de los que hacen.',
+    ];
+    msg = msgs[Math.floor(Math.random() * msgs.length)];
+  } else {
+    emoji = '💪';
+    title = 'BIEN HECHO';
+    msg = `Completaste ${STATE.completedBlocks} de ${STATE.currentBlocks.length} bloques. ¡La próxima, entera!`;
+  }
+
+  document.getElementById('summary-emoji').textContent = emoji;
+  document.getElementById('summary-title').textContent = title;
+  document.getElementById('summary-msg').textContent = msg;
+
+  // Stats
+  const statsEl = document.getElementById('summary-stats');
+  statsEl.innerHTML = `
+    <div class="ss-card">
+      <div class="ss-label">Duración</div>
+      <div class="ss-val">${totalMins}<span style="font-size:16px;color:var(--muted)">min</span></div>
+    </div>
+    <div class="ss-card">
+      <div class="ss-label">Bloques</div>
+      <div class="ss-val">${STATE.completedBlocks}<span style="font-size:16px;color:var(--muted)">/${STATE.currentBlocks.length}</span></div>
+    </div>
+    <div class="ss-card">
+      <div class="ss-label">Racha</div>
+      <div class="ss-val">${STATE.streak}<span style="font-size:16px;color:var(--muted)">días</span></div>
+    </div>
+    <div class="ss-card">
+      <div class="ss-label">Total</div>
+      <div class="ss-val">${STATE.totalWorkouts}<span style="font-size:16px;color:var(--muted)"> sesk</span></div>
+    </div>
+  `;
+
+  // Breakdown
+  const breakdown = {};
+  STATE.currentBlocks.slice(0, STATE.completedBlocks).forEach(b => {
+    breakdown[b.type] = (breakdown[b.type] || 0) + b.mins;
+  });
+
+  const bbEl = document.getElementById('blocks-breakdown');
+  bbEl.innerHTML = `<div class="bb-title">DESGLOSE POR INTENSIDAD</div>` +
+    Object.entries(breakdown).map(([type, mins]) => `
+      <div class="bb-row">
+        <div class="bb-dot" style="background:${INTENSITIES[type].color}"></div>
+        <div class="bb-name">${INTENSITIES[type].label}</div>
+        <div class="bb-time">${mins}min</div>
+      </div>
+    `).join('');
+}
+
+// ══════════════════════════════════════
+//  WAKE LOCK
+// ══════════════════════════════════════
+let wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch(e) {}
+}
+function releaseWakeLock() {
+  if (wakeLock) { wakeLock.release(); wakeLock = null; }
+}
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState === 'visible' && STATE.isRunning && !wakeLock) {
+    await requestWakeLock();
+  }
+});
+
+// ══════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ══════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════
+// Register SW
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+
+loadState();
+// Pre-load voices
+speechSynthesis.getVoices();
+window.speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+
+updateHomeUI();
+</script>
+</body>
+</html>
