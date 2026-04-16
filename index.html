@@ -3,38 +3,49 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0a0a0f">
+<meta name="theme-color" content="#0a0a12">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="VeloBeast">
-<meta name="description" content="Entrenamiento por intervalos en bicicleta con guía por voz">
+<meta name="apple-mobile-web-app-title" content="Kinger PTR">
+<meta name="description" content="Kinger – Personal Trainer de Intervalos">
 <link rel="manifest" href="manifest.json">
-<title>VeloBeast 🐾</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet">
+<title>Kinger PTR 👑</title>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap');
+
+/* Fallback fonts if offline */
+@font-face {
+  font-family: 'Bebas Neue';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Bebas Neue');
+}
+
 :root {
-  --bg: #0a0a0f;
-  --bg2: #111118;
-  --bg3: #1a1a24;
-  --card: #16161f;
-  --border: rgba(255,255,255,0.07);
-  --text: #f0f0f8;
-  --muted: rgba(240,240,248,0.4);
-  --dim: rgba(240,240,248,0.15);
+  --bg: #0a0a12;
+  --bg2: #0f0f1a;
+  --bg3: #161625;
+  --card: #13131e;
+  --border: rgba(160,100,255,0.12);
+  --border-glow: rgba(160,100,255,0.35);
+  --text: #f2f0ff;
+  --muted: rgba(242,240,255,0.45);
+  --dim: rgba(242,240,255,0.15);
 
   --suave: #4ade80;
   --medio: #facc15;
   --fuerte: #f97316;
   --mfuerte: #ef4444;
 
-  --accent: #7c3aed;
-  --accent2: #a78bfa;
+  --purple: #7c3aed;
+  --purple2: #a78bfa;
+  --purple3: #c4b5fd;
+  --purple-glow: rgba(124,58,237,0.4);
 
-  --r: 16px;
-  --shadow: 0 8px 32px rgba(0,0,0,0.5);
+  --r: 18px;
+  --shadow: 0 8px 40px rgba(0,0,0,0.6);
+  --outline: 0 0 0 1.5px rgba(167,139,250,0.25), 0 0 16px rgba(124,58,237,0.15);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -43,80 +54,139 @@ html, body {
   height: 100%;
   background: var(--bg);
   color: var(--text);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
   overflow: hidden;
   position: fixed;
   width: 100%;
 }
 
+/* GLOBAL BG GRADIENT */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 100%, rgba(80,20,160,0.55) 0%, rgba(40,10,80,0.2) 45%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
 /* ─── SCREENS ─── */
-.screen { 
-  position: absolute; inset: 0; 
-  display: none; 
+.screen {
+  position: absolute; inset: 0;
+  display: none;
   flex-direction: column;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  z-index: 1;
 }
 .screen.active { display: flex; }
 
 /* ─── HOME ─── */
 #home {
-  background: radial-gradient(ellipse at 30% 20%, rgba(124,58,237,0.15) 0%, transparent 60%),
-              radial-gradient(ellipse at 80% 80%, rgba(79,70,229,0.1) 0%, transparent 50%),
-              var(--bg);
   align-items: center;
-  justify-content: space-between;
-  padding: 0 24px 32px;
+  justify-content: flex-start;
+  padding: 0 20px 32px;
 }
 
-.home-top {
+/* ── STREAK BAR ── */
+.streak-bar {
+  width: 100%;
+  background: linear-gradient(90deg, rgba(124,58,237,0.25) 0%, rgba(80,20,140,0.15) 100%);
+  border-bottom: 1px solid var(--border-glow);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 4px;
+  flex-shrink: 0;
+}
+.streak-bar::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  background: linear-gradient(90deg, rgba(124,58,237,0.5) 0%, transparent 100%);
+  transition: width 0.8s cubic-bezier(0.34,1.3,0.64,1);
+}
+.streak-icon-wrap {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0;
+}
+.streak-flame-svg { width: 28px; height: 28px; filter: drop-shadow(0 0 6px #f97316); }
+.streak-info { position: relative; z-index: 1; flex: 1; }
+.streak-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.streak-number { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; color: var(--purple3); }
+.streak-progress-track {
+  position: relative; z-index: 1;
+  width: 80px; height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.streak-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--purple), var(--purple3));
+  transition: width 0.8s cubic-bezier(0.34,1.3,0.64,1);
+  box-shadow: 0 0 8px var(--purple-glow);
+}
+
+/* ── HEADER ── */
+.home-header {
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 52px 0 0;
+  padding: 12px 0 8px;
 }
+.app-logo-wrap { display: flex; align-items: center; gap: 10px; }
+.app-logo-img { width: 40px; height: 40px; object-fit: contain; border-radius: 10px; box-shadow: 0 0 12px var(--purple-glow); }
+.app-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 3px; color: var(--text); }
+.app-subtitle { font-size: 9px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; font-weight: 600; line-height: 1; }
 
-.app-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 32px;
-  letter-spacing: 3px;
-  color: var(--text);
+.btn-notes {
+  width: 40px; height: 40px;
+  background: var(--card);
+  border: 1px solid var(--border-glow);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--outline);
+  transition: transform 0.1s, background 0.2s;
 }
+.btn-notes:active { transform: scale(0.94); }
+.btn-notes svg { width: 20px; height: 20px; }
 
-.streak-pill {
-  background: rgba(124,58,237,0.2);
-  border: 1px solid rgba(124,58,237,0.4);
-  border-radius: 40px;
-  padding: 6px 14px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
-}
-.streak-fire { font-size: 16px; }
-
+/* ── MASCOT ── */
 .mascot-area {
-  flex: 1;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
+  gap: 0;
+  padding: 4px 0;
 }
 
-.mascot-wrap {
+.mascot-img-wrap {
   position: relative;
-  width: 160px;
-  height: 160px;
+  width: 180px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.mascot-svg {
-  width: 160px;
-  height: 160px;
-  filter: drop-shadow(0 0 24px rgba(124,58,237,0.4));
-  animation: float 3s ease-in-out infinite;
+.mascot-img {
+  width: 170px;
+  height: 170px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 20px rgba(124,58,237,0.5)) drop-shadow(0 0 40px rgba(80,20,140,0.3));
+  animation: float 3.5s ease-in-out infinite;
+  outline: none;
+  /* Soft purple outline effect */
+  border-radius: 0;
 }
 
 @keyframes float {
@@ -124,186 +194,161 @@ html, body {
   50% { transform: translateY(-10px); }
 }
 
-.mascot-bubble {
-  position: absolute;
-  top: -14px;
-  right: -20px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 6px 10px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--muted);
-  white-space: nowrap;
-  animation: fadeInPop 0.4s ease;
+.mascot-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  letter-spacing: 4px;
+  color: var(--purple3);
+  text-transform: uppercase;
+  opacity: 0.7;
+  margin-top: 2px;
 }
-.mascot-bubble::after {
+
+/* ── SPEECH BUBBLE ── */
+.speech-box {
+  width: calc(100% - 0px);
+  min-height: 52px;
+  background: var(--card);
+  border: 1px solid var(--border-glow);
+  border-radius: 16px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.5;
+  position: relative;
+  box-shadow: 0 0 0 1px rgba(167,139,250,0.15), 0 4px 20px rgba(0,0,0,0.4);
+  margin-bottom: 10px;
+  text-align: center;
+}
+.speech-box::before {
   content: '';
   position: absolute;
-  bottom: -6px;
-  left: 20px;
-  width: 10px; height: 10px;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px; height: 8px;
   background: var(--card);
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  transform: rotate(45deg);
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  border-top: none;
 }
 
-@keyframes fadeInPop {
-  from { opacity: 0; transform: scale(0.8) translateY(4px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-.mascot-name {
-  font-size: 13px;
-  color: var(--muted);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  font-weight: 500;
-}
-
+/* ── TODAY CARD ── */
 .day-card {
   width: 100%;
   background: var(--card);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-glow);
   border-radius: var(--r);
-  padding: 16px 18px;
-  margin-bottom: 12px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  box-shadow: var(--outline);
 }
-
-.day-label {
-  font-size: 11px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 6px;
-  font-weight: 500;
-}
-
-.day-name {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px;
-  letter-spacing: 2px;
-  margin-bottom: 8px;
-}
-
-.day-preview {
-  display: flex;
-  gap: 3px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.dp-block {
-  height: 6px;
-  border-radius: 3px;
-  transition: width 0.3s;
-}
-
+.day-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+.day-name { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; margin-bottom: 7px; }
+.day-preview { display: flex; gap: 3px; align-items: center; flex-wrap: wrap; }
+.dp-block { height: 6px; border-radius: 3px; }
 .dp-suave { background: var(--suave); }
 .dp-medio { background: var(--medio); }
 .dp-fuerte { background: var(--fuerte); }
 .dp-mfuerte { background: var(--mfuerte); }
 
-.home-actions {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+/* ── HOME ACTIONS ── */
+.home-actions { width: 100%; display: flex; flex-direction: column; gap: 8px; }
 
 .btn-primary {
   width: 100%;
-  padding: 18px;
-  background: linear-gradient(135deg, var(--accent), #4f46e5);
+  padding: 16px;
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
   border: none;
   border-radius: var(--r);
   color: white;
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px;
+  font-size: 20px;
   letter-spacing: 3px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 24px rgba(124,58,237,0.4);
+  box-shadow: 0 4px 24px rgba(124,58,237,0.5), 0 0 0 1px rgba(167,139,250,0.2);
   transition: transform 0.1s, box-shadow 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
 }
-.btn-primary:active { transform: scale(0.97); box-shadow: 0 2px 12px rgba(124,58,237,0.3); }
+.btn-primary:active { transform: scale(0.97); }
 .btn-primary::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
   pointer-events: none;
 }
+.btn-primary svg { width: 22px; height: 22px; flex-shrink: 0; }
 
 .btn-secondary {
   width: 100%;
-  padding: 14px;
+  padding: 13px;
   background: var(--card);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-glow);
   border-radius: var(--r);
   color: var(--text);
   font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.2s, transform 0.1s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: var(--outline);
 }
 .btn-secondary:active { transform: scale(0.97); background: var(--bg3); }
+.btn-secondary svg { width: 18px; height: 18px; flex-shrink: 0; }
 
-/* ─── ROUTINE PICKER ─── */
+/* ─── LIVES ─── */
+.lives-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  justify-content: center;
+}
+.life-heart { font-size: 0; width: 22px; height: 22px; display: inline-block; }
+.life-heart svg { width: 22px; height: 22px; }
+
+/* ─── PICKER ─── */
 #picker {
   background: var(--bg);
   padding: 0 20px 100px;
 }
-
 .nav-header {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 52px 0 20px;
+  gap: 12px;
+  padding: 52px 0 16px;
 }
-
 .btn-back {
-  width: 42px; height: 42px;
+  width: 40px; height: 40px;
   background: var(--card);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-glow);
   border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 18px;
   flex-shrink: 0;
   transition: background 0.2s;
+  box-shadow: var(--outline);
 }
 .btn-back:active { background: var(--bg3); }
-
-.nav-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 28px;
-  letter-spacing: 2px;
-}
-
-.section-title {
-  font-size: 11px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-weight: 600;
-  margin: 20px 0 10px;
-}
+.nav-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 2px; }
+.section-title { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 16px 0 8px; }
 
 .routine-card {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--r);
-  padding: 16px;
-  margin-bottom: 10px;
+  padding: 14px;
+  margin-bottom: 8px;
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s, transform 0.1s;
   position: relative;
   overflow: hidden;
+  box-shadow: var(--outline);
 }
 .routine-card::before {
   content: '';
@@ -313,65 +358,38 @@ html, body {
   background: transparent;
   transition: background 0.2s;
 }
-.routine-card.selected {
-  border-color: rgba(124,58,237,0.5);
-  background: rgba(124,58,237,0.08);
-}
-.routine-card.selected::before { background: var(--accent2); }
+.routine-card.selected { border-color: rgba(124,58,237,0.6); background: rgba(124,58,237,0.08); }
+.routine-card.selected::before { background: var(--purple2); }
 .routine-card:active { transform: scale(0.98); }
-
-.rc-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 10px;
-}
-
-.rc-name {
-  font-weight: 700;
-  font-size: 16px;
-}
+.rc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.rc-name { font-weight: 700; font-size: 15px; }
 .rc-day-badge {
-  font-size: 10px;
+  font-size: 9px;
   background: rgba(124,58,237,0.2);
-  border: 1px solid rgba(124,58,237,0.3);
-  color: var(--accent2);
+  border: 1px solid rgba(124,58,237,0.35);
+  color: var(--purple2);
   padding: 2px 8px;
   border-radius: 20px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.5px;
 }
-
-.rc-meta {
-  font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 10px;
-}
-
-.rc-blocks {
-  display: flex;
-  gap: 2px;
-  height: 8px;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.rc-block { height: 100%; border-radius: 2px; }
+.rc-meta { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+.rc-blocks { display: flex; gap: 2px; height: 7px; border-radius: 4px; overflow: hidden; }
 
 .btn-start-routine {
   position: fixed;
   bottom: 24px;
   left: 20px; right: 20px;
-  padding: 18px;
-  background: linear-gradient(135deg, var(--accent), #4f46e5);
+  padding: 16px;
+  background: linear-gradient(135deg, var(--purple), #4f46e5);
   border: none;
   border-radius: var(--r);
   color: white;
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px;
+  font-size: 20px;
   letter-spacing: 3px;
   cursor: pointer;
-  box-shadow: 0 4px 24px rgba(124,58,237,0.4);
+  box-shadow: 0 4px 24px rgba(124,58,237,0.5);
   transition: transform 0.1s;
   z-index: 10;
 }
@@ -379,10 +397,9 @@ html, body {
 
 /* ─── WORKOUT ─── */
 #workout {
-  background: var(--bg);
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px 36px;
+  padding: 0 20px 32px;
   overflow: hidden;
 }
 
@@ -391,24 +408,17 @@ html, body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 52px;
+  padding-top: 48px;
 }
-
-.wh-title { 
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 18px;
-  letter-spacing: 2px;
-  color: var(--muted);
-}
-
+.wh-title { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 2px; color: var(--muted); }
 .wh-close {
-  width: 38px; height: 38px;
+  width: 36px; height: 36px;
   background: var(--card);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-glow);
   border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 16px;
   transition: background 0.2s;
 }
 
@@ -417,312 +427,230 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex: 1;
   justify-content: center;
 }
 
 .intensity-ring {
   position: relative;
-  width: 200px;
-  height: 200px;
+  width: 190px; height: 190px;
 }
-
 .intensity-ring svg {
-  position: absolute;
-  inset: 0;
+  position: absolute; inset: 0;
   transform: rotate(-90deg);
 }
-
-.intensity-ring circle.track {
-  fill: none;
-  stroke: rgba(255,255,255,0.06);
-  stroke-width: 8;
-}
-
+.intensity-ring circle.track { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 8; }
 .intensity-ring circle.progress {
   fill: none;
   stroke-width: 8;
   stroke-linecap: round;
   transition: stroke-dashoffset 0.5s ease, stroke 0.4s ease;
 }
-
 .ring-center {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
   gap: 2px;
 }
-
-.intensity-label {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 36px;
-  letter-spacing: 3px;
-  transition: color 0.3s;
-}
-
-.block-timer {
-  font-size: 42px;
-  font-weight: 300;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -1px;
-}
-
-.block-sub {
-  font-size: 11px;
-  color: var(--muted);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-
-.blocks-timeline {
-  width: 100%;
-  display: flex;
-  gap: 3px;
-  height: 10px;
-  border-radius: 5px;
-  overflow: hidden;
-}
-
-.bt-block {
-  height: 100%;
-  border-radius: 2px;
-  transition: opacity 0.3s;
-  position: relative;
-}
-.bt-block.done { opacity: 0.35; }
-.bt-block.current { opacity: 1; position: relative; }
-.bt-block.current::after {
-  content: '';
-  position: absolute;
-  top: -2px; bottom: -2px;
-  left: 0; right: 0;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-radius: 3px;
-  animation: pulse-border 1s ease-in-out infinite;
-}
-@keyframes pulse-border {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
-.stats-row {
-  width: 100%;
-  display: flex;
-  gap: 10px;
-}
-
-.stat-card {
-  flex: 1;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 14px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.stat-label {
-  font-size: 10px;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-weight: 600;
-}
-
-.stat-value {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 24px;
-  letter-spacing: 1px;
-}
+.intensity-label { font-family: 'Bebas Neue', sans-serif; font-size: 30px; letter-spacing: 3px; transition: color 0.3s; }
+.block-timer { font-size: 44px; font-weight: 300; font-variant-numeric: tabular-nums; letter-spacing: -1px; }
+.block-sub { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
 
 .next-block-pill {
   background: var(--bg3);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-glow);
   border-radius: 40px;
-  padding: 8px 18px;
-  font-size: 12px;
+  padding: 7px 16px;
+  font-size: 11px;
   color: var(--muted);
+  box-shadow: var(--outline);
 }
-.nbp-name { font-weight: 600; color: var(--text); }
+.nbp-name { font-weight: 700; color: var(--text); }
 
-.workout-controls {
-  width: 100%;
-  display: flex;
-  gap: 10px;
+.blocks-timeline {
+  width: 100%; display: flex; gap: 3px; height: 9px; border-radius: 5px; overflow: hidden;
 }
+.bt-block { height: 100%; border-radius: 2px; transition: opacity 0.3s; }
+.bt-block.done { opacity: 0.3; }
+.bt-block.current { opacity: 1; }
+.bt-block.current::after {
+  content: '';
+  position: absolute;
+  top: -2px; bottom: -2px; left: 0; right: 0;
+  border: 2px solid rgba(255,255,255,0.25);
+  border-radius: 3px;
+  animation: pulse-border 1s ease-in-out infinite;
+}
+@keyframes pulse-border { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
+.stats-row { width: 100%; display: flex; gap: 8px; }
+.stat-card {
+  flex: 1; background: var(--card);
+  border: 1px solid var(--border-glow);
+  border-radius: 14px; padding: 12px 10px;
+  display: flex; flex-direction: column; gap: 3px;
+  box-shadow: var(--outline);
+}
+.stat-label { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; }
+
+.workout-controls { width: 100%; display: flex; gap: 8px; }
 .btn-ctrl {
-  flex: 1;
-  padding: 18px;
-  border: none;
-  border-radius: var(--r);
-  cursor: pointer;
-  transition: transform 0.1s, opacity 0.2s;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 20px;
-  letter-spacing: 2px;
+  flex: 1; padding: 16px; border: none; border-radius: var(--r);
+  cursor: pointer; transition: transform 0.1s; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px;
 }
 .btn-ctrl:active { transform: scale(0.96); }
-
-.btn-pause {
-  background: var(--card);
-  border: 1px solid var(--border);
-  color: var(--text);
-}
-
-.btn-stop {
-  background: rgba(239,68,68,0.12);
-  border: 1px solid rgba(239,68,68,0.2);
-  color: #ef4444;
-  flex: 0.4;
-}
-
-/* ─── SUMMARY ─── */
-#summary {
-  background: radial-gradient(ellipse at 50% 0%, rgba(74,222,128,0.12) 0%, transparent 60%),
-              var(--bg);
-  align-items: center;
-  padding: 0 24px 40px;
-  gap: 20px;
-}
-
-.summary-top {
-  padding-top: 64px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  text-align: center;
-}
-
-.summary-emoji {
-  font-size: 64px;
-  animation: bounceIn 0.6s cubic-bezier(0.34,1.56,0.64,1);
-}
-@keyframes bounceIn {
-  from { transform: scale(0) rotate(-10deg); opacity: 0; }
-  to { transform: scale(1) rotate(0deg); opacity: 1; }
-}
-
-.summary-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 36px;
-  letter-spacing: 3px;
-}
-.summary-msg {
-  font-size: 15px;
-  color: var(--muted);
-  font-weight: 300;
-  font-style: italic;
-  line-height: 1.5;
-}
-
-.summary-stats {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.ss-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 16px;
-}
-.ss-label {
-  font-size: 10px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-weight: 600;
-  margin-bottom: 6px;
-}
-.ss-val {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 32px;
-  letter-spacing: 1px;
-}
-
-.blocks-breakdown {
-  width: 100%;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 16px;
-}
-
-.bb-title {
-  font-size: 11px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-weight: 600;
-  margin-bottom: 12px;
-}
-
-.bb-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border);
-}
-.bb-row:last-child { border-bottom: none; }
-
-.bb-dot {
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.bb-name {
-  flex: 1;
-  margin-left: 10px;
-  font-size: 14px;
-  font-weight: 500;
-}
-.bb-time {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 18px;
-  color: var(--muted);
-}
-
-.mascot-celebrate {
-  animation: celebrate 0.5s ease-in-out 3;
-}
-@keyframes celebrate {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  25% { transform: translateY(-15px) rotate(-5deg); }
-  75% { transform: translateY(-8px) rotate(5deg); }
-}
+.btn-pause { background: var(--card); border: 1px solid var(--border-glow); color: var(--text); }
+.btn-stop { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #ef4444; flex: 0.4; }
 
 /* ─── PAUSED OVERLAY ─── */
 .paused-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(10,10,15,0.85);
-  backdrop-filter: blur(8px);
-  display: flex;
+  position: absolute; inset: 0;
+  background: rgba(10,10,18,0.88);
+  backdrop-filter: blur(10px);
+  display: none;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 24px;
   z-index: 50;
-  display: none;
 }
 .paused-overlay.visible { display: flex; }
+.paused-text { font-family: 'Bebas Neue', sans-serif; font-size: 48px; letter-spacing: 4px; color: var(--purple3); }
 
-.paused-text {
+/* ─── SUMMARY ─── */
+#summary {
+  align-items: center;
+  padding: 0 20px 40px;
+  gap: 16px;
+}
+.summary-top {
+  padding-top: 52px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  width: 100%; text-align: center;
+}
+.summary-mascot {
+  width: 160px; height: 160px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 24px rgba(124,58,237,0.6));
+  animation: bounceIn 0.6s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes bounceIn {
+  from { transform: scale(0) rotate(-8deg); opacity: 0; }
+  to { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.summary-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 3px; }
+.summary-msg { font-size: 14px; color: var(--muted); font-weight: 300; font-style: italic; line-height: 1.5; }
+.summary-benefits {
+  width: 100%;
+  background: rgba(124,58,237,0.1);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--r);
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--purple3);
+  line-height: 1.6;
+}
+.summary-stats {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.ss-card {
+  background: var(--card);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--r);
+  padding: 14px;
+  box-shadow: var(--outline);
+}
+.ss-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+.ss-val { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 1px; }
+.blocks-breakdown { width: 100%; background: var(--card); border: 1px solid var(--border-glow); border-radius: var(--r); padding: 14px; box-shadow: var(--outline); }
+.bb-title { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); font-weight: 600; margin-bottom: 10px; }
+.bb-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.bb-row:last-child { border-bottom: none; }
+.bb-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.bb-name { flex: 1; margin-left: 9px; font-size: 13px; font-weight: 500; }
+.bb-time { font-family: 'Bebas Neue', sans-serif; font-size: 17px; color: var(--muted); }
+
+/* ─── NOTES SCREEN ─── */
+#notes {
+  background: var(--bg);
+  padding: 0 20px 40px;
+}
+.notes-tabs {
+  display: flex; gap: 6px; margin-bottom: 16px;
+}
+.notes-tab {
+  flex: 1; padding: 10px 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 12px; font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.notes-tab.active {
+  background: rgba(124,58,237,0.15);
+  border-color: var(--border-glow);
+  color: var(--purple3);
+}
+.notes-panel { display: none; }
+.notes-panel.active { display: block; }
+
+.measure-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.measure-field {
+  background: var(--card);
+  border: 1px solid var(--border-glow);
+  border-radius: 12px;
+  padding: 12px;
+}
+.measure-label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
+.measure-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 48px;
-  letter-spacing: 4px;
-  color: var(--accent2);
+  font-size: 22px;
+  letter-spacing: 1px;
+}
+.measure-input::placeholder { color: var(--dim); }
+
+.notes-textarea {
+  width: 100%;
+  min-height: 200px;
+  background: var(--card);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--r);
+  padding: 14px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+}
+.notes-textarea::placeholder { color: var(--dim); }
+
+.btn-save-notes {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--purple), #4f46e5);
+  border: none;
+  border-radius: var(--r);
+  color: white;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  margin-top: 12px;
+  box-shadow: 0 4px 20px rgba(124,58,237,0.4);
 }
 
 /* ─── TOAST ─── */
@@ -732,7 +660,7 @@ html, body {
   left: 50%;
   transform: translateX(-50%) translateY(-80px);
   background: var(--card);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-glow);
   border-radius: 40px;
   padding: 10px 20px;
   font-size: 14px;
@@ -741,102 +669,142 @@ html, body {
   transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
   z-index: 999;
   pointer-events: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
 
 /* ─── TRANSITIONS ─── */
-.screen-enter {
-  animation: slideUp 0.35s cubic-bezier(0.32,0.72,0,1);
-}
+.screen-enter { animation: slideUp 0.35s cubic-bezier(0.32,0.72,0,1); }
 @keyframes slideUp {
-  from { transform: translateY(30px); opacity: 0; }
+  from { transform: translateY(28px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* ─── SCROLLBAR ─── */
 ::-webkit-scrollbar { width: 0; }
 
+/* Kinger image outline glow */
+.kinger-glow {
+  filter:
+    drop-shadow(0 0 0px rgba(167,139,250,0.9))
+    drop-shadow(0 0 12px rgba(124,58,237,0.5))
+    drop-shadow(0 0 30px rgba(80,20,140,0.35));
+}
+
+/* Beep indicator */
+.beep-flash {
+  animation: beepFlash 0.25s ease-out;
+}
+@keyframes beepFlash {
+  0% { filter: drop-shadow(0 0 0px rgba(167,139,250,0.9)) drop-shadow(0 0 12px rgba(124,58,237,0.5)); }
+  50% { filter: drop-shadow(0 0 4px rgba(250,204,21,1)) drop-shadow(0 0 24px rgba(250,204,21,0.7)); }
+  100% { filter: drop-shadow(0 0 0px rgba(167,139,250,0.9)) drop-shadow(0 0 12px rgba(124,58,237,0.5)); }
+}
 </style>
 </head>
 <body>
 
-<!-- ════════════════ HOME ════════════════ -->
+<!-- ════════ HOME ════════ -->
 <div id="home" class="screen active">
-  <div class="home-top">
-    <div class="app-title">VELOBEAST</div>
-    <div class="streak-pill">
-      <span class="streak-fire">🔥</span>
-      <span id="streak-count">0</span> días
-    </div>
-  </div>
 
-  <div class="mascot-area">
-    <div class="mascot-wrap">
-      <svg class="mascot-svg" id="mascot-svg" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- body -->
-        <ellipse cx="80" cy="95" rx="38" ry="32" fill="#7c3aed" opacity="0.9"/>
-        <!-- head -->
-        <ellipse cx="80" cy="60" rx="30" ry="28" fill="#a78bfa"/>
-        <!-- ears -->
-        <ellipse cx="55" cy="38" rx="9" ry="13" fill="#7c3aed" transform="rotate(-15 55 38)"/>
-        <ellipse cx="105" cy="38" rx="9" ry="13" fill="#7c3aed" transform="rotate(15 105 38)"/>
-        <ellipse cx="55" cy="38" rx="5" ry="8" fill="#c4b5fd" opacity="0.6" transform="rotate(-15 55 38)"/>
-        <ellipse cx="105" cy="38" rx="5" ry="8" fill="#c4b5fd" opacity="0.6" transform="rotate(15 105 38)"/>
-        <!-- eyes -->
-        <ellipse id="eye-l" cx="70" cy="56" rx="7" ry="8" fill="white"/>
-        <ellipse id="eye-r" cx="90" cy="56" rx="7" ry="8" fill="white"/>
-        <circle id="pupil-l" cx="71" cy="57" r="4" fill="#1a1a24"/>
-        <circle id="pupil-r" cx="91" cy="57" r="4" fill="#1a1a24"/>
-        <circle cx="73" cy="55" r="1.5" fill="white"/>
-        <circle cx="93" cy="55" r="1.5" fill="white"/>
-        <!-- nose -->
-        <ellipse cx="80" cy="68" rx="4" ry="2.5" fill="#6d28d9"/>
-        <!-- mouth - happy by default -->
-        <path id="mascot-mouth" d="M 72 74 Q 80 80 88 74" stroke="#6d28d9" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <!-- cheeks -->
-        <ellipse id="cheek-l" cx="62" cy="68" rx="7" ry="5" fill="#f472b6" opacity="0.4"/>
-        <ellipse id="cheek-r" cx="98" cy="68" rx="7" ry="5" fill="#f472b6" opacity="0.4"/>
-        <!-- tail -->
-        <path d="M 118 90 Q 140 75 135 60 Q 130 50 140 45" stroke="#7c3aed" stroke-width="8" stroke-linecap="round" fill="none"/>
-        <!-- arms -->
-        <ellipse cx="47" cy="90" rx="10" ry="18" fill="#7c3aed" transform="rotate(15 47 90)"/>
-        <ellipse cx="113" cy="90" rx="10" ry="18" fill="#7c3aed" transform="rotate(-15 113 90)"/>
-        <!-- legs -->
-        <ellipse cx="65" cy="120" rx="11" ry="16" fill="#6d28d9"/>
-        <ellipse cx="95" cy="120" rx="11" ry="16" fill="#6d28d9"/>
-        <!-- belly patch -->
-        <ellipse cx="80" cy="98" rx="20" ry="18" fill="#c4b5fd" opacity="0.3"/>
+  <!-- STREAK BAR -->
+  <div class="streak-bar" id="streak-bar">
+    <div style="position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,rgba(124,58,237,0.45) 0%,transparent 100%);transition:width 0.8s cubic-bezier(0.34,1.3,0.64,1);" id="streak-bar-fill"></div>
+    <div class="streak-icon-wrap">
+      <!-- Flame SVG -->
+      <svg class="streak-flame-svg" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14 2C14 2 18 7 18 11C18 11 20 9 20 7C20 7 24 11 24 16C24 21.5228 19.5228 26 14 26C8.47715 26 4 21.5228 4 16C4 10 10 5 10 5C10 5 10 9 12 11C12 11 10 8 14 2Z" fill="url(#fg1)"/>
+        <path d="M14 16C14 16 16 14 16 12C16 12 18 14 18 17C18 19.2091 16.2091 21 14 21C11.7909 21 10 19.2091 10 17C10 15 12 13 12 13C12 13 12 15 14 16Z" fill="#fff" opacity="0.5"/>
+        <defs>
+          <linearGradient id="fg1" x1="14" y1="2" x2="14" y2="26" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#fbbf24"/>
+            <stop offset="1" stop-color="#ef4444"/>
+          </linearGradient>
+        </defs>
       </svg>
-      <div class="mascot-bubble" id="mascot-bubble">¡Listo para rodar! 🚴</div>
+      <div>
+        <div class="streak-label">RACHA</div>
+        <div class="streak-number"><span id="streak-count">0</span> DÍAS</div>
+      </div>
     </div>
-    <div class="mascot-name">KIRA</div>
+    <div class="streak-progress-track">
+      <div class="streak-progress-fill" id="streak-fill" style="width:0%"></div>
+    </div>
+    <!-- Lives -->
+    <div class="lives-row" id="lives-row"></div>
   </div>
 
+  <!-- HEADER -->
+  <div class="home-header" style="padding:10px 0 4px;">
+    <div class="app-logo-wrap">
+      <img class="app-logo-img" id="app-logo" src="" alt="Kinger PTR">
+      <div>
+        <div class="app-title">KINGER PTR</div>
+        <div class="app-subtitle">Personal Trainer</div>
+      </div>
+    </div>
+    <button class="btn-notes" onclick="showScreen('notes')" title="Notas y Medidas">
+      <!-- Notebook SVG -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--purple3)">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        <line x1="9" y1="9" x2="15" y2="9"/>
+        <line x1="9" y1="13" x2="15" y2="13"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- MASCOT -->
+  <div class="mascot-area">
+    <div class="mascot-img-wrap">
+      <img class="mascot-img kinger-glow" id="mascot-img" src="" alt="Kinger">
+    </div>
+    <div class="mascot-name">KINGER</div>
+  </div>
+
+  <!-- SPEECH BOX -->
+  <div class="speech-box" id="speech-box">¡Listo para entrenar! 👑</div>
+
+  <!-- TODAY CARD -->
   <div id="today-card" class="day-card"></div>
 
+  <!-- ACTIONS -->
   <div class="home-actions">
-    <button class="btn-primary" onclick="goToPickerWithToday()">🚴 EMPEZAR HOY</button>
-    <button class="btn-secondary" onclick="showScreen('picker')">📋 Elegir rutina</button>
+    <button class="btn-primary" onclick="goToPickerWithToday()">
+      <!-- Bike SVG -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/>
+        <circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>
+      </svg>
+      EMPEZAR HOY
+    </button>
+    <button class="btn-secondary" onclick="showScreen('picker')">
+      <!-- List SVG -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--purple3)">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+        <line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
+        <line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      Elegir rutina
+    </button>
   </div>
 </div>
 
-<!-- ════════════════ PICKER ════════════════ -->
+<!-- ════════ PICKER ════════ -->
 <div id="picker" class="screen">
   <div class="nav-header">
     <div class="btn-back" onclick="showScreen('home')">←</div>
     <div class="nav-title">RUTINAS</div>
   </div>
-
-  <div class="section-title">Tu plan semanal</div>
+  <div class="section-title">Plan semanal</div>
   <div id="routine-list"></div>
-  <div class="section-title">Personalizadas</div>
+  <div class="section-title">Rutinas personalizadas</div>
   <div id="custom-list"></div>
-
   <div style="height:80px"></div>
-  <button class="btn-start-routine" onclick="startSelectedRoutine()">EMPEZAR RUTINA</button>
+  <button class="btn-start-routine" onclick="startSelectedRoutine()">▶ EMPEZAR RUTINA</button>
 </div>
 
-<!-- ════════════════ WORKOUT ════════════════ -->
+<!-- ════════ WORKOUT ════════ -->
 <div id="workout" class="screen">
   <div class="workout-header">
     <div class="wh-title" id="workout-name">ENTRENAMIENTO</div>
@@ -845,18 +813,17 @@ html, body {
 
   <div class="intensity-display">
     <div class="intensity-ring" id="intensity-ring">
-      <svg viewBox="0 0 200 200" width="200" height="200">
-        <circle class="track" cx="100" cy="100" r="88"/>
-        <circle class="progress" id="ring-progress" cx="100" cy="100" r="88"
-          stroke-dasharray="553" stroke-dashoffset="553" stroke="var(--suave)"/>
+      <svg viewBox="0 0 190 190" width="190" height="190">
+        <circle class="track" cx="95" cy="95" r="83"/>
+        <circle class="progress" id="ring-progress" cx="95" cy="95" r="83"
+          stroke-dasharray="521" stroke-dashoffset="521" stroke="var(--suave)"/>
       </svg>
       <div class="ring-center">
         <div class="intensity-label" id="intensity-label">SUAVE</div>
         <div class="block-timer" id="block-timer">00:00</div>
-        <div class="block-sub" id="block-sub">EN ESTE BLOQUE</div>
+        <div class="block-sub" id="block-sub">RESTANTE</div>
       </div>
     </div>
-
     <div class="next-block-pill" id="next-block-pill">
       Siguiente: <span class="nbp-name" id="next-block-name">–</span>
     </div>
@@ -866,7 +833,7 @@ html, body {
 
   <div class="stats-row">
     <div class="stat-card">
-      <div class="stat-label">Tiempo total</div>
+      <div class="stat-label">Total</div>
       <div class="stat-value" id="total-timer">00:00</div>
     </div>
     <div class="stat-card">
@@ -874,7 +841,7 @@ html, body {
       <div class="stat-value" id="block-counter">1/1</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Intensidad</div>
+      <div class="stat-label">Nivel</div>
       <div class="stat-value" id="intensity-icon">🟢</div>
     </div>
   </div>
@@ -885,41 +852,91 @@ html, body {
   </div>
 
   <div class="paused-overlay" id="paused-overlay">
-    <svg width="80" height="80" viewBox="0 0 160 160" fill="none" class="mascot-svg" style="filter:drop-shadow(0 0 20px rgba(124,58,237,0.5))">
-      <ellipse cx="80" cy="95" rx="38" ry="32" fill="#7c3aed" opacity="0.9"/>
-      <ellipse cx="80" cy="60" rx="30" ry="28" fill="#a78bfa"/>
-      <ellipse cx="55" cy="38" rx="9" ry="13" fill="#7c3aed" transform="rotate(-15 55 38)"/>
-      <ellipse cx="105" cy="38" rx="9" ry="13" fill="#7c3aed" transform="rotate(15 105 38)"/>
-      <circle cx="70" cy="57" r="4" fill="#1a1a24"/>
-      <circle cx="90" cy="57" r="4" fill="#1a1a24"/>
-    </svg>
+    <img id="paused-mascot" src="" style="width:100px;height:100px;object-fit:contain;filter:drop-shadow(0 0 20px rgba(124,58,237,0.6));" alt="Kinger">
     <div class="paused-text">PAUSA</div>
-    <button class="btn-primary" style="width:200px;padding:14px;font-size:18px" onclick="togglePause()">▶ CONTINUAR</button>
+    <button class="btn-primary" style="width:200px;padding:12px;font-size:18px" onclick="togglePause()">▶ CONTINUAR</button>
   </div>
 </div>
 
-<!-- ════════════════ SUMMARY ════════════════ -->
+<!-- ════════ SUMMARY ════════ -->
 <div id="summary" class="screen">
   <div class="summary-top">
-    <div class="summary-emoji" id="summary-emoji">🏆</div>
+    <img class="summary-mascot" id="summary-mascot" src="" alt="Kinger">
     <div class="summary-title" id="summary-title">¡COMPLETADO!</div>
-    <div class="summary-msg" id="summary-msg">Excelente trabajo hoy.</div>
+    <div class="summary-msg" id="summary-msg">Excelente trabajo.</div>
   </div>
 
+  <div class="summary-benefits" id="summary-benefits" style="display:none"></div>
   <div class="summary-stats" id="summary-stats"></div>
   <div class="blocks-breakdown" id="blocks-breakdown"></div>
 
-  <button class="btn-primary" onclick="showScreen('home')" style="margin-top:4px">VOLVER AL INICIO</button>
+  <button class="btn-primary" onclick="showScreen('home')" style="margin-top:4px;width:100%">
+    🏠 VOLVER AL INICIO
+  </button>
 </div>
 
-<!-- Toast -->
+<!-- ════════ NOTES ════════ -->
+<div id="notes" class="screen">
+  <div class="nav-header">
+    <div class="btn-back" onclick="showScreen('home')">←</div>
+    <div class="nav-title">NOTAS & MEDIDAS</div>
+  </div>
+  <div class="notes-tabs">
+    <div class="notes-tab active" onclick="switchTab('measures')">📐 Medidas</div>
+    <div class="notes-tab" onclick="switchTab('notes')">📝 Notas</div>
+    <div class="notes-tab" onclick="switchTab('history')">📅 Historial</div>
+  </div>
+
+  <!-- Measures -->
+  <div class="notes-panel active" id="tab-measures">
+    <div class="measure-grid">
+      <div class="measure-field">
+        <div class="measure-label">Peso (kg)</div>
+        <input class="measure-input" id="m-peso" type="number" placeholder="75.5" inputmode="decimal">
+      </div>
+      <div class="measure-field">
+        <div class="measure-label">Cintura (cm)</div>
+        <input class="measure-input" id="m-cintura" type="number" placeholder="80" inputmode="decimal">
+      </div>
+      <div class="measure-field">
+        <div class="measure-label">Pecho (cm)</div>
+        <input class="measure-input" id="m-pecho" type="number" placeholder="100" inputmode="decimal">
+      </div>
+      <div class="measure-field">
+        <div class="measure-label">Cadera (cm)</div>
+        <input class="measure-input" id="m-cadera" type="number" placeholder="95" inputmode="decimal">
+      </div>
+      <div class="measure-field">
+        <div class="measure-label">Brazo (cm)</div>
+        <input class="measure-input" id="m-brazo" type="number" placeholder="35" inputmode="decimal">
+      </div>
+      <div class="measure-field">
+        <div class="measure-label">Muslo (cm)</div>
+        <input class="measure-input" id="m-muslo" type="number" placeholder="55" inputmode="decimal">
+      </div>
+    </div>
+    <button class="btn-save-notes" onclick="saveMeasures()">💾 GUARDAR MEDIDAS</button>
+  </div>
+
+  <!-- Notes -->
+  <div class="notes-panel" id="tab-notes">
+    <textarea class="notes-textarea" id="notes-text" placeholder="Anotá lo que quieras: cómo te sentiste, qué mejorar, rutinas nuevas..."></textarea>
+    <button class="btn-save-notes" onclick="saveNotes()">💾 GUARDAR NOTAS</button>
+  </div>
+
+  <!-- History -->
+  <div class="notes-panel" id="tab-history">
+    <div id="history-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
+<script src="assets.js"></script>
 <script>
 // ══════════════════════════════════════
-//  DATA & STATE
+//  CONSTANTS
 // ══════════════════════════════════════
-
 const INTENSITIES = {
   suave:   { label: 'SUAVE',      color: '#4ade80', icon: '🟢', tts: 'Suave' },
   medio:   { label: 'MEDIO',      color: '#facc15', icon: '🟡', tts: 'Medio' },
@@ -927,100 +944,92 @@ const INTENSITIES = {
   mfuerte: { label: 'MUY FUERTE', color: '#ef4444', icon: '⚫', tts: 'Muy fuerte' },
 };
 
-// Rutinas del plan semanal
 const WEEKLY_PLAN = {
-  1: { // Lunes
-    name: 'Lunes – Base',
+  1: {
+    name: 'Lunes – Base aeróbica',
     day: 'LUNES',
-    minutes: 65,
     blocks: [
       { type: 'suave',  mins: 10 },
       { type: 'medio',  mins: 30 },
       { type: 'fuerte', mins: 15 },
       { type: 'suave',  mins: 10 },
     ],
-    note: '20 flexiones · 20 sentadillas'
+    note: '20 flexiones · 20 sentadillas',
+    benefits: '🫀 Mejora resistencia cardio · 🔥 Quema grasa eficientemente · 💪 Fortalece piernas y glúteos'
   },
-  2: { // Martes
-    name: 'Martes – Intervalos',
+  2: {
+    name: 'Martes – Intervalos HIIT',
     day: 'MARTES',
-    minutes: 70,
     blocks: [
       { type: 'suave',   mins: 10 },
       ...Array(6).fill(null).flatMap(() => [
-        { type: 'mfuerte', mins: 3, label: 'MUY FUERTE ×6' },
-        { type: 'suave',   mins: 3, label: 'SUAVE ×6' },
+        { type: 'mfuerte', mins: 3 },
+        { type: 'suave',   mins: 3 },
       ]),
       { type: 'suave',   mins: 10 },
     ],
-    note: 'Curl bíceps 3×12 · Curl inverso 3×10'
+    note: 'Curl bíceps 3×12 · Curl inverso 3×10',
+    benefits: '⚡ Acelera metabolismo por 24h · 🎯 Máxima quema de calorías · 🏃 Mejora VO2 máximo'
   },
-  3: { // Miércoles
-    name: 'Miércoles – Largo',
+  3: {
+    name: 'Miércoles – Resistencia',
     day: 'MIÉRCOLES',
-    minutes: 70,
     blocks: [
       { type: 'suave',  mins: 10 },
       { type: 'medio',  mins: 25 },
       { type: 'fuerte', mins: 20 },
       { type: 'suave',  mins: 15 },
     ],
-    note: '25 flexiones · 25 sentadillas'
+    note: '25 flexiones · 25 sentadillas',
+    benefits: '🧠 Reduce estrés y ansiedad · 💛 Mejora humor · 🦵 Tonifica todo el tren inferior'
   },
-  4: { // Jueves
-    name: 'Jueves – Recuperación',
+  4: {
+    name: 'Jueves – Recuperación activa',
     day: 'JUEVES',
-    minutes: 40,
     blocks: [
       { type: 'suave', mins: 40 },
     ],
-    note: 'Día tranquilo 🌿 · Mancuerna 3×12'
+    note: 'Día tranquilo 🌿 · Mancuerna 3×12',
+    benefits: '🌿 Favorece recuperación muscular · 💧 Mejora circulación · 😴 Mejor calidad de sueño'
   },
-  5: { // Viernes
-    name: 'Viernes – Duro',
+  5: {
+    name: 'Viernes – Intensidad máxima',
     day: 'VIERNES',
-    minutes: 65,
     blocks: [
       { type: 'suave',   mins: 10 },
       { type: 'medio',   mins: 20 },
       { type: 'fuerte',  mins: 20 },
       { type: 'mfuerte', mins: 15 },
     ],
-    note: '20 flexiones'
+    note: '20 flexiones · plancha 3×45seg',
+    benefits: '🔥 Pico máximo de quema calórica · 🏆 Aumenta umbral de lactato · 💥 Boost de endorfinas'
   },
-  6: { // Sábado
-    name: 'Sábado – Bestia',
+  6: {
+    name: 'Sábado – La Bestia',
     day: 'SÁBADO',
-    minutes: 100,
     blocks: [
       { type: 'suave',  mins: 10 },
       { type: 'medio',  mins: 75 },
       { type: 'fuerte', mins: 15 },
     ],
-    note: '30 sentadillas · 20 flexiones'
+    note: '30 sentadillas · 20 flexiones',
+    benefits: '🦁 Máxima adaptación cardiovascular · ⚙️ Aumenta eficiencia metabólica · 💪 Semana completada'
   },
-  0: { // Domingo
+  0: {
     name: 'Domingo – Descanso',
     day: 'DOMINGO',
-    minutes: 0,
     blocks: [],
     rest: true,
-    note: 'Descansá, te lo merecés 😴'
+    note: 'Descansá, te lo merecés 😴',
+    benefits: ''
   }
 };
 
+// Rutina personalizada de Kinger
 const CUSTOM_ROUTINES = [
   {
-    id: 'c1',
-    name: 'Intervalos cortos',
-    blocks: Array(8).fill(null).flatMap(() => [
-      { type: 'fuerte',  mins: 2 },
-      { type: 'suave',   mins: 2 },
-    ])
-  },
-  {
-    id: 'c2',
-    name: 'Pirámide',
+    id: 'kinger1',
+    name: '👑 Rutina Kinger – Pirámide Real',
     blocks: [
       { type: 'suave',   mins: 5  },
       { type: 'medio',   mins: 5  },
@@ -1029,15 +1038,47 @@ const CUSTOM_ROUTINES = [
       { type: 'fuerte',  mins: 5  },
       { type: 'medio',   mins: 5  },
       { type: 'suave',   mins: 5  },
-    ]
+    ],
+    benefits: '🔺 Entrenamiento piramidal clásico · Activa todos los sistemas energéticos · Ideal para días variables'
+  },
+  {
+    id: 'kinger2',
+    name: '⚡ Kinger Sprint – Tabata Plus',
+    blocks: [
+      { type: 'suave',   mins: 5 },
+      ...Array(8).fill(null).flatMap(() => [
+        { type: 'mfuerte', mins: 2 },
+        { type: 'suave',   mins: 1 },
+      ]),
+      { type: 'suave', mins: 5 },
+    ],
+    benefits: '⚡ Máximo EPOC post-ejercicio · Quema grasa 48h después · Mejora potencia anaeróbica'
+  },
+  {
+    id: 'kinger3',
+    name: '🏔️ Kinger Escalada – Progresiva',
+    blocks: [
+      { type: 'suave',   mins: 8 },
+      { type: 'suave',   mins: 5 },
+      { type: 'medio',   mins: 8 },
+      { type: 'medio',   mins: 5 },
+      { type: 'fuerte',  mins: 8 },
+      { type: 'fuerte',  mins: 5 },
+      { type: 'mfuerte', mins: 8 },
+      { type: 'suave',   mins: 5 },
+    ],
+    benefits: '🏔️ Progresión gradual óptima · Minimiza lesiones · Perfecto para días de más energía'
   }
 ];
 
-// App state
+// ══════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════
 const STATE = {
   streak: 0,
-  lastWorkout: null, // ISO date string
+  lastWorkout: null,
   totalWorkouts: 0,
+  lives: 3,
   selectedRoutineId: null,
   currentBlocks: [],
   currentBlockIdx: 0,
@@ -1045,9 +1086,12 @@ const STATE = {
   totalElapsed: 0,
   isPaused: false,
   isRunning: false,
-  workoutStartTime: null,
   completedBlocks: 0,
   timer: null,
+  currentRoutine: null,
+  workoutHistory: [],
+  measures: {},
+  notes: '',
 };
 
 // ══════════════════════════════════════
@@ -1055,47 +1099,112 @@ const STATE = {
 // ══════════════════════════════════════
 function loadState() {
   try {
-    const saved = JSON.parse(localStorage.getItem('velobeast_v1') || '{}');
-    STATE.streak = saved.streak || 0;
-    STATE.lastWorkout = saved.lastWorkout || null;
-    STATE.totalWorkouts = saved.totalWorkouts || 0;
+    const s = JSON.parse(localStorage.getItem('kinger_v2') || '{}');
+    STATE.streak = s.streak || 0;
+    STATE.lastWorkout = s.lastWorkout || null;
+    STATE.totalWorkouts = s.totalWorkouts || 0;
+    STATE.lives = s.lives !== undefined ? s.lives : 3;
+    STATE.workoutHistory = s.workoutHistory || [];
+    STATE.measures = s.measures || {};
+    STATE.notes = s.notes || '';
+    // Check streak loss
+    checkStreakIntegrity();
   } catch(e) {}
 }
 
 function saveState() {
-  localStorage.setItem('velobeast_v1', JSON.stringify({
+  localStorage.setItem('kinger_v2', JSON.stringify({
     streak: STATE.streak,
     lastWorkout: STATE.lastWorkout,
-    totalWorkouts: STATE.totalWorkouts
+    totalWorkouts: STATE.totalWorkouts,
+    lives: STATE.lives,
+    workoutHistory: STATE.workoutHistory.slice(-30), // keep last 30
+    measures: STATE.measures,
+    notes: STATE.notes,
   }));
 }
 
-// ══════════════════════════════════════
-//  SPEECH
-// ══════════════════════════════════════
-function speak(text, urgent = false) {
-  if (!window.speechSynthesis) return;
-  if (urgent) speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'es-ES';
-  u.rate = 0.9;
-  u.pitch = 1.1;
-  u.volume = 1.0;
+function checkStreakIntegrity() {
+  if (!STATE.lastWorkout) return;
+  const today = new Date().toISOString().split('T')[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  if (STATE.lastWorkout !== today && STATE.lastWorkout !== yesterday) {
+    // Missed days
+    if (STATE.streak > 0 && STATE.lives > 0) {
+      STATE.lives = Math.max(0, STATE.lives - 1);
+      STATE.streak = 0;
+      saveState();
+    }
+  }
+}
 
-  // Try to find a good Spanish voice
-  const voices = speechSynthesis.getVoices();
-  const es = voices.find(v => v.lang.startsWith('es') && v.localService);
-  if (es) u.voice = es;
+// ══════════════════════════════════════
+//  AUDIO
+// ══════════════════════════════════════
+const AUDIOS = {};
 
-  speechSynthesis.speak(u);
+function initAudios() {
+  const map = {
+    hola:    ASSET_AUDIO_HOLA,
+    suave:   ASSET_AUDIO_SUAVE,
+    medio:   ASSET_AUDIO_MEDIO,
+    fuerte:  ASSET_AUDIO_FUERTE,
+    mfuerte: ASSET_AUDIO_MFUERTE,
+  };
+  for (const [key, src] of Object.entries(map)) {
+    const a = new Audio(src);
+    a.preload = 'auto';
+    AUDIOS[key] = a;
+  }
+}
+
+function playAudio(key) {
+  try {
+    const a = AUDIOS[key];
+    if (!a) return;
+    a.currentTime = 0;
+    a.play().catch(() => {});
+  } catch(e) {}
+}
+
+// Beep using Web Audio API
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function beep(freq = 880, duration = 0.12, vol = 0.4) {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+    // Flash mascot
+    const img = document.getElementById('mascot-img');
+    if (img) {
+      img.classList.add('beep-flash');
+      setTimeout(() => img.classList.remove('beep-flash'), 280);
+    }
+  } catch(e) {}
+}
+
+function doubleBeep() {
+  beep(1000, 0.1, 0.5);
+  setTimeout(() => beep(1000, 0.1, 0.5), 160);
 }
 
 // ══════════════════════════════════════
 //  VIBRATION
 // ══════════════════════════════════════
-function vibrate(pattern) {
-  if (navigator.vibrate) navigator.vibrate(pattern);
-}
+function vibrate(p) { try { navigator.vibrate && navigator.vibrate(p); } catch(e) {} }
 
 // ══════════════════════════════════════
 //  SCREEN NAVIGATION
@@ -1105,9 +1214,9 @@ function showScreen(id) {
   const s = document.getElementById(id);
   s.classList.add('active', 'screen-enter');
   setTimeout(() => s.classList.remove('screen-enter'), 400);
-
   if (id === 'home') updateHomeUI();
   if (id === 'picker') buildPickerUI();
+  if (id === 'notes') loadNotesUI();
 }
 
 // ══════════════════════════════════════
@@ -1116,28 +1225,73 @@ function showScreen(id) {
 function updateHomeUI() {
   document.getElementById('streak-count').textContent = STATE.streak;
 
-  const today = new Date();
-  const dow = today.getDay(); // 0=sun, 1=mon...
-  const plan = WEEKLY_PLAN[dow];
+  // Streak bar fill (max 7 days = 100%)
+  const pct = Math.min(100, (STATE.streak / 7) * 100);
+  document.getElementById('streak-fill').style.width = pct + '%';
+  document.getElementById('streak-bar-fill').style.width = pct + '%';
 
+  // Lives
+  renderLives();
+
+  // Today card
+  const today = new Date();
+  const dow = today.getDay();
+  const plan = WEEKLY_PLAN[dow];
   const card = document.getElementById('today-card');
 
   if (!plan || plan.rest) {
     card.innerHTML = `
       <div class="day-label">HOY · ${getDayName(dow)}</div>
       <div class="day-name">DÍA DE DESCANSO 😴</div>
-      <div style="font-size:13px;color:var(--muted)">Recuperate para mañana 💪</div>`;
+      <div style="font-size:12px;color:var(--muted)">Recuperate para mañana 💪</div>`;
   } else {
-    const totalMin = plan.blocks.reduce((a,b) => a + b.mins, 0);
+    const totalMin = plan.blocks.reduce((a,b) => a+b.mins, 0);
     card.innerHTML = `
       <div class="day-label">HOY · ${getDayName(dow)}</div>
       <div class="day-name">${plan.day} – ${totalMin} MIN</div>
       <div class="day-preview">${buildBlockBar(plan.blocks, 260)}</div>
-      ${plan.note ? `<div style="font-size:12px;color:var(--muted);margin-top:8px">💪 ${plan.note}</div>` : ''}`;
+      ${plan.note ? `<div style="font-size:11px;color:var(--muted);margin-top:6px">💪 ${plan.note}</div>` : ''}`;
   }
 
-  // Mascot mood
-  updateMascotMood();
+  // Mascot mood + image selection
+  updateMascotState();
+}
+
+function renderLives() {
+  const row = document.getElementById('lives-row');
+  row.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const filled = i < STATE.lives;
+    row.innerHTML += `
+      <span class="life-heart">
+        <svg viewBox="0 0 22 22" fill="${filled ? '#ef4444' : 'none'}" stroke="${filled ? '#ef4444' : 'rgba(255,255,255,0.2)'}" stroke-width="1.8">
+          <path d="M11 19s-8-5.5-8-10a5 5 0 0 1 8-4 5 5 0 0 1 8 4c0 4.5-8 10-8 10z"/>
+        </svg>
+      </span>`;
+  }
+}
+
+function updateMascotState() {
+  const img = document.getElementById('mascot-img');
+  const speech = document.getElementById('speech-box');
+
+  // Determine which image + message
+  if (STATE.streak >= 5) {
+    img.src = ASSET_IMG_STREAK5;
+    speech.textContent = `¡${STATE.streak} días de racha! ¡Sos imparable, campeón! 🔥👑`;
+  } else if (STATE.lives === 0) {
+    img.src = ASSET_IMG_LOSING;
+    speech.textContent = '¡Sin vidas! Entrená hoy para recuperar tu racha... 💔';
+  } else if (STATE.streak === 0 && STATE.totalWorkouts > 0) {
+    img.src = ASSET_IMG_LAZY;
+    speech.textContent = '¡Che, no seas vago! ¡A moverse! 😤';
+  } else if (STATE.streak > 0) {
+    img.src = ASSET_IMG_DEFAULT;
+    speech.textContent = `${STATE.streak} día${STATE.streak>1?'s':''} de racha. ¡Seguí así! 💜`;
+  } else {
+    img.src = ASSET_IMG_DEFAULT;
+    speech.textContent = '¡Listo para entrenar! Elegí tu rutina 👑';
+  }
 }
 
 function getDayName(d) {
@@ -1145,57 +1299,19 @@ function getDayName(d) {
 }
 
 function buildBlockBar(blocks, totalPx) {
-  const totalMins = blocks.reduce((a,b) => a + b.mins, 0) || 1;
+  const totalMins = blocks.reduce((a,b) => a+b.mins, 0) || 1;
   return blocks.map(b => {
     const w = Math.round((b.mins / totalMins) * totalPx);
-    const cls = `dp-${b.type}`;
-    return `<div class="dp-block ${cls}" style="width:${w}px"></div>`;
+    return `<div class="dp-block dp-${b.type}" style="width:${w}px"></div>`;
   }).join('');
 }
 
-function updateMascotMood() {
-  const bubble = document.getElementById('mascot-bubble');
-  const mouth = document.getElementById('mascot-mouth');
-  const cheekL = document.getElementById('cheek-l');
-  const cheekR = document.getElementById('cheek-r');
-
-  const streak = STATE.streak;
-
-  let msg, mouthPath;
-
-  if (streak === 0) {
-    msg = '¡Listo para rodar! 🚴';
-    mouthPath = 'M 72 74 Q 80 80 88 74';
-    cheekL.setAttribute('opacity', '0.4');
-    cheekR.setAttribute('opacity', '0.4');
-  } else if (streak >= 7) {
-    msg = `¡${streak} días seguidos! 🔥🔥🔥`;
-    mouthPath = 'M 70 72 Q 80 82 90 72';
-    cheekL.setAttribute('opacity', '0.7');
-    cheekR.setAttribute('opacity', '0.7');
-  } else if (streak >= 3) {
-    msg = `¡${streak} días racha! 🔥 ¡Vas muy bien!`;
-    mouthPath = 'M 71 73 Q 80 81 89 73';
-    cheekL.setAttribute('opacity', '0.55');
-    cheekR.setAttribute('opacity', '0.55');
-  } else {
-    msg = `¡${streak} día${streak>1?'s':''} de racha! Seguí así 💜`;
-    mouthPath = 'M 72 74 Q 80 80 88 74';
-    cheekL.setAttribute('opacity', '0.4');
-    cheekR.setAttribute('opacity', '0.4');
-  }
-
-  bubble.textContent = msg;
-  mouth.setAttribute('d', mouthPath);
-}
-
 // ══════════════════════════════════════
-//  PICKER UI
+//  PICKER
 // ══════════════════════════════════════
 function goToPickerWithToday() {
   const dow = new Date().getDay();
-  const plan = WEEKLY_PLAN[dow];
-  if (plan && !plan.rest) {
+  if (WEEKLY_PLAN[dow] && !WEEKLY_PLAN[dow].rest) {
     STATE.selectedRoutineId = `week_${dow}`;
   }
   showScreen('picker');
@@ -1204,16 +1320,14 @@ function goToPickerWithToday() {
 function buildPickerUI() {
   const list = document.getElementById('routine-list');
   list.innerHTML = '';
-
   const today = new Date().getDay();
 
   Object.entries(WEEKLY_PLAN).forEach(([dow, plan]) => {
     if (plan.rest) return;
     const id = `week_${dow}`;
-    const totalMin = plan.blocks.reduce((a,b) => a + b.mins, 0);
+    const totalMin = plan.blocks.reduce((a,b) => a+b.mins, 0);
     const isToday = parseInt(dow) === today;
     const isSelected = STATE.selectedRoutineId === id;
-
     const card = document.createElement('div');
     card.className = `routine-card ${isSelected ? 'selected' : ''}`;
     card.id = `rc_${id}`;
@@ -1223,17 +1337,15 @@ function buildPickerUI() {
         ${isToday ? '<div class="rc-day-badge">HOY</div>' : ''}
       </div>
       <div class="rc-meta">${totalMin} min · ${plan.blocks.length} bloques${plan.note ? ' · ' + plan.note : ''}</div>
-      <div class="rc-blocks">${buildBlockBar(plan.blocks, 300)}</div>
-    `;
+      <div class="rc-blocks">${buildBlockBar(plan.blocks, 300)}</div>`;
     card.onclick = () => selectRoutine(id);
     list.appendChild(card);
   });
 
   const clist = document.getElementById('custom-list');
   clist.innerHTML = '';
-
   CUSTOM_ROUTINES.forEach(r => {
-    const totalMin = r.blocks.reduce((a,b) => a + b.mins, 0);
+    const totalMin = r.blocks.reduce((a,b) => a+b.mins, 0);
     const isSelected = STATE.selectedRoutineId === r.id;
     const card = document.createElement('div');
     card.className = `routine-card ${isSelected ? 'selected' : ''}`;
@@ -1241,19 +1353,15 @@ function buildPickerUI() {
     card.innerHTML = `
       <div class="rc-top"><div class="rc-name">${r.name}</div></div>
       <div class="rc-meta">${totalMin} min · ${r.blocks.length} bloques</div>
-      <div class="rc-blocks">${buildBlockBar(r.blocks, 300)}</div>
-    `;
+      <div class="rc-blocks">${buildBlockBar(r.blocks, 300)}</div>`;
     card.onclick = () => selectRoutine(r.id);
     clist.appendChild(card);
   });
 
   if (!STATE.selectedRoutineId) {
     const defaultId = `week_${today}`;
-    if (WEEKLY_PLAN[today] && !WEEKLY_PLAN[today].rest) {
-      selectRoutine(defaultId);
-    } else {
-      selectRoutine('week_1');
-    }
+    if (WEEKLY_PLAN[today] && !WEEKLY_PLAN[today].rest) selectRoutine(defaultId);
+    else selectRoutine('week_1');
   }
 }
 
@@ -1265,53 +1373,49 @@ function selectRoutine(id) {
 }
 
 function getRoutineById(id) {
-  if (id.startsWith('week_')) {
-    const dow = parseInt(id.split('_')[1]);
-    return WEEKLY_PLAN[dow];
-  }
+  if (id.startsWith('week_')) return WEEKLY_PLAN[parseInt(id.split('_')[1])];
   return CUSTOM_ROUTINES.find(r => r.id === id);
 }
 
 function startSelectedRoutine() {
   if (!STATE.selectedRoutineId) { showToast('Elegí una rutina primero'); return; }
-  const routine = getRoutineById(STATE.selectedRoutineId);
-  if (!routine || !routine.blocks || routine.blocks.length === 0) {
-    showToast('Esta rutina está vacía'); return;
-  }
-  startWorkout(routine);
+  const r = getRoutineById(STATE.selectedRoutineId);
+  if (!r || !r.blocks || r.blocks.length === 0) { showToast('Esta rutina está vacía'); return; }
+  startWorkout(r);
 }
 
 // ══════════════════════════════════════
 //  WORKOUT ENGINE
 // ══════════════════════════════════════
 function startWorkout(routine) {
-  // Expand blocks to seconds
   STATE.currentBlocks = routine.blocks.map((b, i) => ({
     ...b,
     totalSecs: b.mins * 60,
     idx: i,
-    label: b.label || INTENSITIES[b.type].label
   }));
   STATE.currentBlockIdx = 0;
   STATE.blockElapsed = 0;
   STATE.totalElapsed = 0;
   STATE.isPaused = false;
   STATE.isRunning = true;
-  STATE.workoutStartTime = Date.now();
   STATE.completedBlocks = 0;
-  STATE.routineName = routine.name;
+  STATE.currentRoutine = routine;
 
   buildTimeline();
   showScreen('workout');
+
+  // Set paused mascot image
+  document.getElementById('paused-mascot').src = ASSET_IMG_DEFAULT;
   document.getElementById('workout-name').textContent = routine.name;
 
-  // Wake lock (keep screen on)
   requestWakeLock();
 
-  // First block announcement
-  const first = STATE.currentBlocks[0];
-  speak(`Comenzando. ${INTENSITIES[first.type].tts}`, true);
+  // Play hola audio on start
+  playAudio('hola');
   vibrate([100, 50, 100]);
+
+  // Resume AudioContext on first interaction
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 
   startTimer();
 }
@@ -1328,22 +1432,18 @@ function tick() {
   STATE.totalElapsed++;
 
   const block = STATE.currentBlocks[STATE.currentBlockIdx];
-
-  // 10 sec warning
   const remaining = block.totalSecs - STATE.blockElapsed;
-  if (remaining === 10) {
-    const next = STATE.currentBlocks[STATE.currentBlockIdx + 1];
-    if (next) {
-      speak(`10 segundos. Siguiente: ${INTENSITIES[next.type].tts}`);
-      vibrate([50, 50, 50]);
-    } else {
-      speak('Último bloque. ¡Casi terminás!');
-      vibrate([50, 50, 50]);
-    }
+
+  // 5 sec warning: 1 beep
+  if (remaining === 5) {
+    beep(660, 0.15, 0.4);
+    vibrate([60]);
   }
 
-  // Block complete
+  // Imminent (0 sec) = 2 beeps + audio on new block (handled below)
   if (STATE.blockElapsed >= block.totalSecs) {
+    doubleBeep();
+    vibrate([120, 60, 120]);
     STATE.completedBlocks++;
     STATE.currentBlockIdx++;
 
@@ -1352,11 +1452,12 @@ function tick() {
       return;
     }
 
-    // New block
     STATE.blockElapsed = 0;
     const newBlock = STATE.currentBlocks[STATE.currentBlockIdx];
-    speak(INTENSITIES[newBlock.type].tts, true);
-    vibrate([150, 80, 150]);
+
+    // Play intensity audio
+    playAudio(newBlock.type);
+
     buildTimeline();
   }
 
@@ -1371,37 +1472,28 @@ function updateWorkoutUI() {
   const remaining = block.totalSecs - STATE.blockElapsed;
   const progress = STATE.blockElapsed / block.totalSecs;
 
-  // Ring
-  const circumference = 553;
+  const circumference = 521;
   const offset = circumference - (progress * circumference);
   const ring = document.getElementById('ring-progress');
   ring.style.strokeDashoffset = offset;
   ring.style.stroke = int.color;
 
-  // Label
   const lbl = document.getElementById('intensity-label');
   lbl.textContent = int.label;
   lbl.style.color = int.color;
 
-  // Timer
   document.getElementById('block-timer').textContent = fmtTime(remaining);
   document.getElementById('intensity-icon').textContent = int.icon;
   document.getElementById('total-timer').textContent = fmtTime(STATE.totalElapsed);
-  document.getElementById('block-counter').textContent = 
+  document.getElementById('block-counter').textContent =
     `${STATE.currentBlockIdx + 1}/${STATE.currentBlocks.length}`;
 
-  // Next
   const next = STATE.currentBlocks[STATE.currentBlockIdx + 1];
-  if (next) {
-    document.getElementById('next-block-name').textContent = 
-      `${INTENSITIES[next.type].label} (${next.mins}min)`;
-  } else {
-    document.getElementById('next-block-name').textContent = '¡Último!';
-  }
+  document.getElementById('next-block-name').textContent = next
+    ? `${INTENSITIES[next.type].label} (${next.mins}min)`
+    : '¡Último!';
 
-  // Timeline progress
-  const btBlocks = document.querySelectorAll('.bt-block');
-  btBlocks.forEach((el, i) => {
+  document.querySelectorAll('.bt-block').forEach((el, i) => {
     el.classList.remove('done','current');
     if (i < STATE.currentBlockIdx) el.classList.add('done');
     if (i === STATE.currentBlockIdx) el.classList.add('current');
@@ -1410,17 +1502,15 @@ function updateWorkoutUI() {
 
 function buildTimeline() {
   const tl = document.getElementById('blocks-timeline');
-  const total = STATE.currentBlocks.reduce((a,b) => a+b.totalSecs, 0);
   tl.innerHTML = STATE.currentBlocks.map((b, i) => {
-    const w = Math.round((b.totalSecs / total) * 100);
     const cls = i < STATE.currentBlockIdx ? 'done' : i === STATE.currentBlockIdx ? 'current' : '';
     return `<div class="bt-block ${cls}" style="flex:${b.mins};background:${INTENSITIES[b.type].color}"></div>`;
   }).join('');
 }
 
 function fmtTime(secs) {
-  const m = Math.floor(secs / 60).toString().padStart(2,'0');
-  const s = (secs % 60).toString().padStart(2,'0');
+  const m = Math.floor(Math.abs(secs) / 60).toString().padStart(2,'0');
+  const s = (Math.abs(secs) % 60).toString().padStart(2,'0');
   return `${m}:${s}`;
 }
 
@@ -1428,135 +1518,172 @@ function togglePause() {
   STATE.isPaused = !STATE.isPaused;
   const overlay = document.getElementById('paused-overlay');
   const btnPause = document.getElementById('btn-pause');
-
   if (STATE.isPaused) {
     overlay.classList.add('visible');
     btnPause.textContent = '▶ CONTINUAR';
-    speak('Pausa');
     vibrate([200]);
   } else {
     overlay.classList.remove('visible');
     btnPause.textContent = '⏸ PAUSAR';
-    speak('¡Seguimos!', true);
     vibrate([100, 50, 200]);
   }
 }
 
 function confirmStop() {
-  if (confirm('¿Salir del entrenamiento?')) {
-    stopWorkout(false);
-  }
+  if (confirm('¿Salir del entrenamiento?')) stopWorkout();
 }
 
-function stopWorkout(completed) {
+function stopWorkout() {
   clearInterval(STATE.timer);
   STATE.isRunning = false;
   releaseWakeLock();
-  speechSynthesis.cancel();
-
-  if (completed) {
-    recordWorkout();
-    showSummary(true);
-  } else {
-    // Partial – no streak
-    showScreen('home');
-  }
+  showScreen('home');
 }
 
 function finishWorkout() {
   clearInterval(STATE.timer);
   STATE.isRunning = false;
-  speak('¡Terminaste! Excelente trabajo. ¡Así se hace!', true);
-  vibrate([200,100,200,100,400]);
   releaseWakeLock();
-  recordWorkout();
-  setTimeout(() => showSummary(true), 1800);
-}
 
-function recordWorkout() {
+  // Update streak
   const today = new Date().toISOString().split('T')[0];
   if (STATE.lastWorkout !== today) {
     const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-    if (STATE.lastWorkout === yesterday) {
-      STATE.streak++;
-    } else {
-      STATE.streak = 1;
-    }
+    STATE.streak = STATE.lastWorkout === yesterday ? STATE.streak + 1 : 1;
     STATE.lastWorkout = today;
     STATE.totalWorkouts++;
+    // Recover 1 life on workout completion (max 3)
+    STATE.lives = Math.min(3, STATE.lives + 0.5);
+    // Record history
+    STATE.workoutHistory.push({
+      date: today,
+      name: STATE.currentRoutine?.name || 'Entrenamiento',
+      mins: Math.floor(STATE.totalElapsed / 60),
+      blocks: STATE.completedBlocks,
+    });
     saveState();
   }
+
+  setTimeout(() => showSummary(), 1000);
 }
 
-// ══════════════════════════════════════
-//  SUMMARY
-// ══════════════════════════════════════
-function showSummary(completed) {
+function showSummary() {
   showScreen('summary');
 
   const totalMins = Math.floor(STATE.totalElapsed / 60);
   const pct = Math.round((STATE.completedBlocks / STATE.currentBlocks.length) * 100);
 
-  // Emoji + title + message
-  let emoji, title, msg;
+  // Choose mascot image for summary
+  const summaryImg = document.getElementById('summary-mascot');
+  let summaryTitle, summaryMsg;
 
   if (pct === 100) {
-    emoji = STATE.streak >= 5 ? '🏆' : STATE.streak >= 3 ? '⭐' : '✅';
-    title = pct === 100 ? '¡COMPLETADO!' : 'BUEN TRABAJO';
+    summaryImg.src = ASSET_IMG_COMPLETE;
+    summaryTitle = '¡COMPLETADO!';
     const msgs = [
-      'Hoy te superaste. El esfuerzo se acumula.',
-      '¡Así se construye una bestia! Cada pedalada cuenta.',
-      `¡${STATE.streak} días seguidos! Sos imparable.`,
-      'Tu cuerpo te lo va a agradecer. Buen trabajo.',
+      'Cada pedalada cuenta. ¡Así se hace!',
+      `¡${STATE.streak} días de racha! Sos imparable.`,
+      'Tu cuerpo te lo va a agradecer 💜',
       'Esto es lo que separa a los que hablan de los que hacen.',
     ];
-    msg = msgs[Math.floor(Math.random() * msgs.length)];
+    summaryMsg = msgs[Math.floor(Math.random() * msgs.length)];
   } else {
-    emoji = '💪';
-    title = 'BIEN HECHO';
-    msg = `Completaste ${STATE.completedBlocks} de ${STATE.currentBlocks.length} bloques. ¡La próxima, entera!`;
+    summaryImg.src = ASSET_IMG_LAZY;
+    summaryTitle = 'BIEN HECHO';
+    summaryMsg = `Completaste ${STATE.completedBlocks} de ${STATE.currentBlocks.length} bloques. ¡La próxima, entera!`;
   }
 
-  document.getElementById('summary-emoji').textContent = emoji;
-  document.getElementById('summary-title').textContent = title;
-  document.getElementById('summary-msg').textContent = msg;
+  document.getElementById('summary-title').textContent = summaryTitle;
+  document.getElementById('summary-msg').textContent = summaryMsg;
+
+  // Benefits
+  const benefitsEl = document.getElementById('summary-benefits');
+  const benefits = STATE.currentRoutine?.benefits || '';
+  if (benefits && pct === 100) {
+    benefitsEl.style.display = 'block';
+    benefitsEl.innerHTML = `<strong style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--purple3)">BENEFICIOS DE HOY</strong><br><br>${benefits}`;
+  } else {
+    benefitsEl.style.display = 'none';
+  }
 
   // Stats
-  const statsEl = document.getElementById('summary-stats');
-  statsEl.innerHTML = `
-    <div class="ss-card">
-      <div class="ss-label">Duración</div>
-      <div class="ss-val">${totalMins}<span style="font-size:16px;color:var(--muted)">min</span></div>
-    </div>
-    <div class="ss-card">
-      <div class="ss-label">Bloques</div>
-      <div class="ss-val">${STATE.completedBlocks}<span style="font-size:16px;color:var(--muted)">/${STATE.currentBlocks.length}</span></div>
-    </div>
-    <div class="ss-card">
-      <div class="ss-label">Racha</div>
-      <div class="ss-val">${STATE.streak}<span style="font-size:16px;color:var(--muted)">días</span></div>
-    </div>
-    <div class="ss-card">
-      <div class="ss-label">Total</div>
-      <div class="ss-val">${STATE.totalWorkouts}<span style="font-size:16px;color:var(--muted)"> sesk</span></div>
-    </div>
-  `;
+  document.getElementById('summary-stats').innerHTML = `
+    <div class="ss-card"><div class="ss-label">Duración</div><div class="ss-val">${totalMins}<span style="font-size:14px;color:var(--muted)">min</span></div></div>
+    <div class="ss-card"><div class="ss-label">Bloques</div><div class="ss-val">${STATE.completedBlocks}<span style="font-size:14px;color:var(--muted)">/${STATE.currentBlocks.length}</span></div></div>
+    <div class="ss-card"><div class="ss-label">Racha</div><div class="ss-val">${STATE.streak}<span style="font-size:14px;color:var(--muted)">días</span></div></div>
+    <div class="ss-card"><div class="ss-label">Total sesiones</div><div class="ss-val">${STATE.totalWorkouts}</div></div>`;
 
   // Breakdown
   const breakdown = {};
   STATE.currentBlocks.slice(0, STATE.completedBlocks).forEach(b => {
     breakdown[b.type] = (breakdown[b.type] || 0) + b.mins;
   });
-
-  const bbEl = document.getElementById('blocks-breakdown');
-  bbEl.innerHTML = `<div class="bb-title">DESGLOSE POR INTENSIDAD</div>` +
-    Object.entries(breakdown).map(([type, mins]) => `
+  document.getElementById('blocks-breakdown').innerHTML =
+    `<div class="bb-title">DESGLOSE POR INTENSIDAD</div>` +
+    Object.entries(breakdown).map(([t, m]) => `
       <div class="bb-row">
-        <div class="bb-dot" style="background:${INTENSITIES[type].color}"></div>
-        <div class="bb-name">${INTENSITIES[type].label}</div>
-        <div class="bb-time">${mins}min</div>
+        <div class="bb-dot" style="background:${INTENSITIES[t].color}"></div>
+        <div class="bb-name">${INTENSITIES[t].label}</div>
+        <div class="bb-time">${m}min</div>
+      </div>`).join('');
+}
+
+// ══════════════════════════════════════
+//  NOTES
+// ══════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.notes-tab').forEach((t,i) => {
+    t.classList.toggle('active', ['measures','notes','history'][i] === tab);
+  });
+  document.querySelectorAll('.notes-panel').forEach((p,i) => {
+    p.classList.toggle('active', ['tab-measures','tab-notes','tab-history'][i] === 'tab-'+tab);
+  });
+  if (tab === 'history') renderHistory();
+}
+
+function loadNotesUI() {
+  const m = STATE.measures;
+  ['peso','cintura','pecho','cadera','brazo','muslo'].forEach(k => {
+    const el = document.getElementById(`m-${k}`);
+    if (el && m[k]) el.value = m[k];
+  });
+  const nt = document.getElementById('notes-text');
+  if (nt) nt.value = STATE.notes || '';
+}
+
+function saveMeasures() {
+  ['peso','cintura','pecho','cadera','brazo','muslo'].forEach(k => {
+    const el = document.getElementById(`m-${k}`);
+    if (el) STATE.measures[k] = el.value;
+  });
+  saveState();
+  showToast('✅ Medidas guardadas');
+}
+
+function saveNotes() {
+  const nt = document.getElementById('notes-text');
+  if (nt) STATE.notes = nt.value;
+  saveState();
+  showToast('✅ Notas guardadas');
+}
+
+function renderHistory() {
+  const el = document.getElementById('history-list');
+  if (!STATE.workoutHistory.length) {
+    el.innerHTML = '<div style="color:var(--muted);text-align:center;padding:24px;font-size:14px">Aún no hay entrenamientos registrados</div>';
+    return;
+  }
+  el.innerHTML = [...STATE.workoutHistory].reverse().map(h => `
+    <div style="background:var(--card);border:1px solid var(--border-glow);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:13px;font-weight:600">${h.name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">${h.date}</div>
       </div>
-    `).join('');
+      <div style="text-align:right">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--purple3)">${h.mins}min</div>
+        <div style="font-size:10px;color:var(--muted)">${h.blocks} bloques</div>
+      </div>
+    </div>`).join('');
 }
 
 // ══════════════════════════════════════
@@ -1565,18 +1692,14 @@ function showSummary(completed) {
 let wakeLock = null;
 async function requestWakeLock() {
   try {
-    if ('wakeLock' in navigator) {
-      wakeLock = await navigator.wakeLock.request('screen');
-    }
+    if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
   } catch(e) {}
 }
 function releaseWakeLock() {
   if (wakeLock) { wakeLock.release(); wakeLock = null; }
 }
 document.addEventListener('visibilitychange', async () => {
-  if (document.visibilityState === 'visible' && STATE.isRunning && !wakeLock) {
-    await requestWakeLock();
-  }
+  if (document.visibilityState === 'visible' && STATE.isRunning && !wakeLock) await requestWakeLock();
 });
 
 // ══════════════════════════════════════
@@ -1592,17 +1715,22 @@ function showToast(msg) {
 // ══════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════
-// Register SW
+// Set logo
+document.getElementById('app-logo').src = ASSET_LOGO;
+
+// Service Worker
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
 loadState();
-// Pre-load voices
-speechSynthesis.getVoices();
-window.speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
-
+initAudios();
 updateHomeUI();
+
+// Unlock AudioContext on first tap (iOS)
+document.addEventListener('touchstart', () => {
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}, { once: true });
 </script>
 </body>
 </html>
